@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm your signup</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc; /* Slate 50 */
+            color: #0f172a; /* Slate 900 */
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f8fafc;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border: 1px solid #e2e8f0; /* Slate 200 */
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            padding: 48px 32px;
+            text-align: center;
+        }
+        .logo-text {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .content {
+            padding: 48px 40px;
+            text-align: center;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 16px;
+            letter-spacing: -0.02em;
+        }
+        p {
+            font-size: 16px;
+            color: #64748b; /* Slate 500 */
+            margin: 0 0 32px;
+            line-height: 1.7;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 36px;
+            background: #2563eb;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+        .button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+        }
+        .footer {
+            padding: 32px;
+            background-color: #f8fafc;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer p {
+            font-size: 13px;
+            color: #94a3b8; /* Slate 400 */
+            margin: 4px 0;
+        }
+        .social-link {
+            color: #94a3b8;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div style="height: 40px;"></div>
+        <div class="container">
+            <div class="header">
+                 <!-- You can replace this text with an <img> tag for your logo -->
+                <h2 class="logo-text">Meld</h2>
+            </div>
+            <div class="content">
+                <span class="badge">Verification Required</span>
+                <h1>Confirm your email address</h1>
+                <p>Welcome to Meld! You're just one step away from joining your global team. Please verify your email to secure your account and get started.</p>
+                
+                <a href="{{ .ConfirmationURL }}" class="button">Verify Email Address</a>
+                
+                <p style="margin-top: 40px; font-size: 13px; color: #94a3b8; margin-bottom: 0;">
+                    If you didn't create an account, you can safely ignore this email.
+                </p>
+            </div>
+            <div class="footer">
+                <p>&copy; 2026 Meld Inc. All rights reserved.</p>
+                <div style="margin-top: 12px;">
+                    <a href="#" class="social-link">Twitter</a> • 
+                    <a href="#" class="social-link">Privacy</a> • 
+                    <a href="#" class="social-link">Terms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

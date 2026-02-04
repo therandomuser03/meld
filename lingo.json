@@ -1,0 +1,6 @@
+{
+  "sourceLocale": "en",
+  "locales": ["en", "hi", "es", "fr", "de", "zh"],
+  "format": "json-i18next",
+  "files": "src/i18n/messages/*.json"
+}
