@@ -73,11 +73,11 @@ export function CreateGroupDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-white/10" title="Create Group">
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent" title="Create Group">
           <Users className="h-5 w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-white/10 text-white sm:max-w-[425px]">
+      <DialogContent className="bg-card border-border text-card-foreground sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create Group</DialogTitle>
         </DialogHeader>
@@ -85,26 +85,26 @@ export function CreateGroupDialog() {
         <div className="space-y-6 pt-4">
           {/* Group Name */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-slate-400 uppercase">Group Name</Label>
+            <Label className="text-xs font-medium text-muted-foreground uppercase">Group Name</Label>
             <Input
               placeholder="e.g., Marketing Team, Project Alpha"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="bg-slate-950 border-white/10 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           {/* Member Selection */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-slate-400 uppercase">
+            <Label className="text-xs font-medium text-muted-foreground uppercase">
               Add Members ({selectedUsers.length})
             </Label>
 
-            <div className="border border-white/10 rounded-xl bg-slate-950/50">
+            <div className="border border-border rounded-xl bg-muted/50">
               <ScrollArea className="h-[200px] p-2">
                 <div className="space-y-1">
-                  {loading && <div className="p-4 text-center text-xs text-slate-500">Loading connections...</div>}
-                  {!loading && connections.length === 0 && <div className="p-4 text-center text-xs text-slate-500">No connections available</div>}
+                  {loading && <div className="p-4 text-center text-xs text-muted-foreground">Loading connections...</div>}
+                  {!loading && connections.length === 0 && <div className="p-4 text-center text-xs text-muted-foreground">No connections available</div>}
                   {!loading && connections.map((user) => {
                     const isSelected = selectedUsers.includes(user.id);
                     return (
@@ -113,24 +113,24 @@ export function CreateGroupDialog() {
                         onClick={() => toggleUser(user.id)}
                         className={cn(
                           "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors",
-                          isSelected ? "bg-blue-600/20" : "hover:bg-white/5"
+                          isSelected ? "bg-primary/20" : "hover:bg-accent/50"
                         )}
                       >
                         <div className={cn(
                           "h-5 w-5 rounded border flex items-center justify-center transition-all",
-                          isSelected ? "bg-blue-600 border-blue-600" : "border-slate-600"
+                          isSelected ? "bg-primary border-primary" : "border-muted-foreground"
                         )}>
-                          {isSelected && <Plus className="h-3 w-3 text-white" />}
+                          {isSelected && <Plus className="h-3 w-3 text-primary-foreground" />}
                         </div>
 
-                        <Avatar className="h-8 w-8 border border-white/10">
+                        <Avatar className="h-8 w-8 border border-border">
                           <AvatarImage src={user.avatarUrl} />
-                          <AvatarFallback className="bg-slate-800 text-slate-400 text-xs">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                             {user.name?.substring(0, 2)}
                           </AvatarFallback>
                         </Avatar>
 
-                        <span className={cn("text-sm", isSelected ? "text-blue-100" : "text-slate-300")}>
+                        <span className={cn("text-sm", isSelected ? "text-primary" : "text-foreground")}>
                           {user.name}
                         </span>
                       </div>
@@ -143,7 +143,7 @@ export function CreateGroupDialog() {
         </div>
 
         <DialogFooter className="pt-2">
-          <Button variant="ghost" onClick={() => setOpen(false)} className="text-slate-400 hover:text-white">
+          <Button variant="ghost" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
             Cancel
           </Button>
           <Button

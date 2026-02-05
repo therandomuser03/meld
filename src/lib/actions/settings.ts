@@ -10,6 +10,7 @@ const profileSchema = z.object({
   username: z.string().min(3).optional().or(z.literal('')),
   bio: z.string().max(250).optional(),
   profession: z.string().optional(),
+  avatarUrl: z.string().optional().nullable(),
   preferredReadingLocale: z.string().optional(),
   gender: z.enum(["MALE", "FEMALE", "NON_BINARY", "PREFER_NOT_TO_SAY", "OTHER"]).optional(),
   languages: z.array(z.string()).optional(),
@@ -23,11 +24,18 @@ export async function updateProfile(prevState: any, formData: FormData) {
     return { error: "Unauthorized" };
   }
 
+  console.log("updateProfile rawData:", {
+    hasAvatar: !!formData.get("avatarUrl"),
+    avatarUrl: formData.get("avatarUrl"),
+    name: formData.get("name")
+  });
+
   const rawData = {
     name: formData.get("name") as string,
     username: (formData.get("username") as string)?.toLowerCase(),
     bio: formData.get("bio") as string,
     profession: formData.get("profession") as string,
+    avatarUrl: formData.get("avatarUrl") as string, // will be null if missing
     preferredReadingLocale: formData.get("preferredReadingLocale") as string,
     gender: formData.get("gender") as string,
     languages: formData.getAll("languages") as string[],
@@ -70,8 +78,13 @@ export async function updateProfile(prevState: any, formData: FormData) {
     });
 
     revalidatePath("/settings");
+    revalidatePath("/", "layout"); // Update Sidebar and caching
+    revalidatePath("/people"); // Update connections page
     return { success: "Profile updated successfully" };
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'P2002' && error.meta?.target?.includes('username')) {
+      return { error: "Username already taken" };
+    }
     console.error("Profile update error:", error);
     return { error: "Failed to update profile" };
   }

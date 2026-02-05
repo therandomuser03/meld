@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 import { updateOnboardingLanguages, completeOnboarding } from "@/lib/actions/onboarding";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ScrollArea } from "@/components/ui/scroll-area";
+// import { ScrollArea } from "@/components/ui/scroll-area"; // Removed as LanguagePicker has its own scroll area logic or we wrap it
+
 
 const schema = z.object({
     languages: z.array(z.string()).min(1, "Select at least one language"),
@@ -17,8 +18,10 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
+import { LanguagePicker, Language } from "@/components/ui/language-picker";
+
 interface Props {
-    languages: { id: string; nameEnglish: string; nativeName: string | null; }[];
+    languages: Language[];
 }
 
 export function LanguagesForm({ languages }: Props) {
@@ -38,14 +41,7 @@ export function LanguagesForm({ languages }: Props) {
 
     const selected = watch("languages");
 
-    const toggleLanguage = (id: string) => {
-        const current = selected || [];
-        if (current.includes(id)) {
-            setValue("languages", current.filter(l => l !== id));
-        } else {
-            setValue("languages", [...current, id]);
-        }
-    };
+
 
     async function onSubmit(data: Values) {
         setIsLoading(true);
@@ -80,31 +76,17 @@ export function LanguagesForm({ languages }: Props) {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <ScrollArea className="h-[300px] border border-white/10 rounded-md p-4 bg-white/5">
-                <div className="grid grid-cols-2 gap-2">
-                    {languages.map(lang => (
-                        <div
-                            key={lang.id}
-                            onClick={() => toggleLanguage(lang.id)}
-                            className={cn(
-                                "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors border text-sm",
-                                selected.includes(lang.id)
-                                    ? "bg-blue-600/20 border-blue-500/50 text-white"
-                                    : "bg-transparent border-white/5 text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                            )}
-                        >
-                            <div className="flex flex-col">
-                                <span className="font-medium text-white">{lang.nameEnglish}</span>
-                                <span className="text-xs opacity-70">{lang.nativeName}</span>
-                            </div>
-                            {selected.includes(lang.id) && <Check className="h-4 w-4 text-blue-400" />}
-                        </div>
-                    ))}
-                </div>
-            </ScrollArea>
-            {errors.languages && <p className="text-xs text-red-500 text-center">{errors.languages.message}</p>}
+            <div className="border border-white/5 rounded-xl p-4 bg-white/5 backdrop-blur-sm shadow-inner min-h-[400px]">
+                <LanguagePicker
+                    languages={languages}
+                    selectedIds={selected}
+                    onChange={(ids) => setValue("languages", ids, { shouldValidate: true })}
+                    className="h-full"
+                />
+            </div>
+            {errors.languages && <p className="text-xs text-red-400 text-center font-medium bg-red-400/10 py-2 rounded-lg border border-red-400/20">{errors.languages.message}</p>}
 
-            <Button disabled={isLoading || selected.length === 0} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+            <Button disabled={isLoading || selected.length === 0} className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Finish Setup
             </Button>

@@ -5,6 +5,7 @@ import { Search, Filter, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PersonCard } from "@/components/connections/person-card";
+import { InvitationCard } from "@/components/connections/invitation-card";
 import { searchUsers } from "@/lib/actions/connections";
 import debounce from "lodash/debounce";
 
@@ -25,9 +26,10 @@ interface UserGridProps {
     initialSuggestions: User[];
     initialPending: User[];
     initialAccepted: User[];
+    initialReceived: any[]; // Using any[] for now to match structure passed from page, but ideally strict typed
 }
 
-export function UserGrid({ currentUserId, initialSuggestions, initialPending, initialAccepted }: UserGridProps) {
+export function UserGrid({ currentUserId, initialSuggestions, initialPending, initialAccepted, initialReceived = [] }: UserGridProps) {
     const [suggestions, setSuggestions] = React.useState<User[]>(initialSuggestions);
     const [isSearching, setIsSearching] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState("");
@@ -67,7 +69,7 @@ export function UserGrid({ currentUserId, initialSuggestions, initialPending, in
     const renderGrid = (users: User[], emptyMessage: string) => {
         if (users.length === 0) {
             return (
-                <div className="text-center py-20 bg-slate-900/20 rounded-3xl border border-dashed border-white/5">
+                <div className="text-center py-20 dark:bg-slate-900/20 bg-slate-50 rounded-3xl border border-dashed dark:border-white/5 border-slate-200">
                     <p className="text-slate-500 text-sm">{emptyMessage}</p>
                 </div>
             );
@@ -91,24 +93,30 @@ export function UserGrid({ currentUserId, initialSuggestions, initialPending, in
         <Tabs defaultValue="all" className="space-y-8">
             {/* Search & Tabs Bar */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <TabsList className="bg-slate-900/50 border border-white/10 p-1 h-auto self-start">
+                <TabsList className="dark:bg-slate-900/50 bg-white border dark:border-white/10 border-slate-200 p-1 h-auto self-start shadow-sm flex-wrap w-full md:w-auto">
                     <TabsTrigger
                         value="all"
-                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-lg transition-all"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:text-slate-400 text-slate-600 px-6 py-2 rounded-lg transition-all"
                     >
                         All
                     </TabsTrigger>
                     <TabsTrigger
-                        value="pending"
-                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-lg transition-all"
+                        value="friends"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:text-slate-400 text-slate-600 px-6 py-2 rounded-lg transition-all mr-auto"
                     >
-                        Pending ({initialPending.length})
+                        Friends ({initialAccepted.length})
                     </TabsTrigger>
                     <TabsTrigger
-                        value="accepted"
-                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-lg transition-all"
+                        value="received"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:text-slate-400 text-slate-600 px-6 py-2 rounded-lg transition-all"
                     >
-                        Accepted ({initialAccepted.length})
+                        Received ({initialReceived.length})
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="pending"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:text-slate-400 text-slate-600 px-6 py-2 rounded-lg transition-all"
+                    >
+                        Sent ({initialPending.length})
                     </TabsTrigger>
                 </TabsList>
 
@@ -120,30 +128,45 @@ export function UserGrid({ currentUserId, initialSuggestions, initialPending, in
                         value={searchTerm}
                         onChange={handleSearchChange}
                         placeholder="Search for new people..."
-                        className="pl-10 h-11 bg-slate-900/50 border-white/10 text-white placeholder:text-slate-500 rounded-xl focus:ring-blue-600"
+                        className="pl-10 h-11 dark:bg-slate-900/50 bg-white dark:border-white/10 border-slate-200 dark:text-white text-slate-900 placeholder:text-slate-500 rounded-xl focus:ring-blue-600"
                     />
                 </div>
             </div>
 
             <TabsContent value="all" className="space-y-6 mt-0">
                 <div className="flex items-center justify-between px-1">
-                    <h2 className="text-xl font-bold text-white tracking-tight">
+                    <h2 className="text-xl font-bold dark:text-white text-slate-900 tracking-tight">
                         {searchTerm ? "Search Results" : "Discovery"}
                     </h2>
-                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white">
+                    <Button variant="ghost" size="icon" className="text-slate-500 dark:hover:text-white hover:text-slate-900">
                         <Filter className="h-4 w-4" />
                     </Button>
                 </div>
                 {renderGrid(suggestions, "No people found.")}
             </TabsContent>
 
+            <TabsContent value="received" className="mt-0">
+                <h2 className="text-xl font-bold dark:text-white text-slate-900 tracking-tight mb-6">Received Requests</h2>
+                {initialReceived.length === 0 ? (
+                    <div className="text-center py-20 dark:bg-slate-900/20 bg-slate-50 rounded-3xl border border-dashed dark:border-white/5 border-slate-200">
+                        <p className="text-slate-500 text-sm">No new requests received.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {initialReceived.map((req) => (
+                            <InvitationCard key={req.id} request={req} />
+                        ))}
+                    </div>
+                )}
+            </TabsContent>
+
             <TabsContent value="pending" className="mt-0">
-                <h2 className="text-xl font-bold text-white tracking-tight mb-6">Invitations Sent</h2>
+                <h2 className="text-xl font-bold dark:text-white text-slate-900 tracking-tight mb-6">Sent Requests</h2>
                 {renderGrid(initialPending, "You haven't sent any invitations recently.")}
             </TabsContent>
 
-            <TabsContent value="accepted" className="mt-0">
-                <h2 className="text-xl font-bold text-white tracking-tight mb-6">Your Network</h2>
+            <TabsContent value="friends" className="mt-0">
+                <h2 className="text-xl font-bold dark:text-white text-slate-900 tracking-tight mb-6">Friends</h2>
                 {renderGrid(initialAccepted, "You haven't connected with anyone yet.")}
             </TabsContent>
         </Tabs>

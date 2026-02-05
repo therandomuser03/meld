@@ -4,7 +4,7 @@ import * as React from "react";
 import { sendMessage, getThreadMessages, markThreadAsRead } from "@/actions/chat";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, MoreVertical, Search, Send, Smile, Users } from "lucide-react";
+import { Loader2, MoreVertical, Search, Send, Smile, Users, Phone, Video, Paperclip } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -37,9 +37,11 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ threadId, initialMessages = [], currentUserId, otherUser, userLanguages = [], isGroup = false }: ChatWindowProps) {
-  const { messages: storeMessages, setMessages } = useChatStore();
+  const { messages: storeMessages, setMessages, addMessage } = useChatStore();
   const [inputText, setInputText] = React.useState("");
   const [isSending, setIsSending] = React.useState(false);
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   // Translation state
   const [translatingMsg, setTranslatingMsg] = React.useState<{ id: string, content: string } | null>(null);
@@ -47,6 +49,11 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
   // Typing state
   const [otherUserTyping, setOtherUserTyping] = React.useState(false);
   const typingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const router = useRouter();
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -99,16 +106,18 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
   };
 
 
-  const messages = threadMessages.map(msg => ({
-    id: msg.id,
-    content: msg.content,
-    isOwn: msg.authorId === currentUserId,
-    time: msg.createdAt,
-    author: msg.author?.name || "Unknown",
-    authorAvatar: msg.author?.avatarUrl || undefined,
-    translatedContent: msg.translations?.[0]?.translatedContent,
-    sourceLanguage: msg.sourceLocale || undefined,
-  }));
+  const messages = threadMessages
+    .filter(msg => !searchQuery || msg.content.toLowerCase().includes(searchQuery.toLowerCase()))
+    .map(msg => ({
+      id: msg.id,
+      content: msg.content,
+      isOwn: msg.authorId === currentUserId,
+      time: msg.createdAt,
+      author: msg.author?.name || "Unknown",
+      authorAvatar: msg.author?.avatarUrl || undefined,
+      translatedContent: msg.translations?.[0]?.translatedContent,
+      sourceLanguage: msg.sourceLocale || undefined,
+    }));
 
   // Scroll to bottom on load and new messages
   React.useEffect(() => {
@@ -125,9 +134,23 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
 
     setIsSending(true);
     try {
-      await sendMessage(threadId, currentUserId, inputText.trim());
+      const sentMessage = await sendMessage(threadId, currentUserId, inputText.trim());
+      addMessage(threadId, sentMessage as any); // Optimistic / Immediate update
       setInputText("");
-      router.refresh();
+
+      // Broadcast new message to others immediately
+      supabase.channel(`thread:${threadId}`).send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: sentMessage
+      });
+
+      // Broadcast stop typing
+      supabase.channel(`thread:${threadId}`).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { userId: currentUserId, isTyping: false }
+      });
     } catch (error) {
       toast.error("Failed to send message");
     } finally {
@@ -162,7 +185,7 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
   };
 
   return (
-    <div className="flex flex-col h-full dark:bg-slate-950/50 bg-slate-200/50">
+    <div className="flex flex-col h-full bg-background/50">
       <TranslateDialog
         open={!!translatingMsg}
         onOpenChange={(open) => !open && setTranslatingMsg(null)}
@@ -173,47 +196,56 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
       />
 
       {/* Chat Header */}
-      <header className="h-16 border-b dark:border-white/10 border-black/5 flex items-center justify-between px-6 dark:bg-slate-950/80 bg-white/80 backdrop-blur-md z-10">
+      <header className="h-16 border-b border-border flex items-center justify-between px-6 bg-background/80 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
           <Avatar className={cn(
-            "h-10 w-10 border dark:border-white/10 border-black/5 ring-2",
-            isGroup ? "ring-purple-500/10" : "ring-blue-500/10"
+            "h-10 w-10 border border-border ring-2",
+            isGroup ? "ring-accent/10" : "ring-primary/10"
           )}>
             <AvatarImage src={otherUser.avatar} />
             <AvatarFallback className={cn(
-              "font-bold dark:text-slate-300 text-slate-600",
-              isGroup ? "bg-purple-900/50" : "dark:bg-slate-800 bg-slate-300"
+              "font-bold text-muted-foreground",
+              isGroup ? "bg-accent/10" : "bg-muted"
             )}>
               {isGroup ? (
-                <Users className="h-5 w-5 text-purple-400" />
+                <Users className="h-5 w-5 text-primary dark:text-white" />
               ) : (
                 (otherUser.name || "U").substring(0, 2).toUpperCase()
               )}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="text-sm font-bold dark:text-white text-slate-900 tracking-tight">{otherUser.name || "User"}</h3>
-            <div className="flex items-center gap-2">
-              <p className={cn(
-                "text-[10px] font-medium uppercase tracking-wider",
-                isGroup ? "text-purple-400" : "text-blue-500 font-bold"
-              )}>
-                {isGroup ? "Group Message" : "Direct Message"}
-              </p>
-              {otherUserTyping && (
-                <span className="text-[10px] dark:text-slate-400 text-slate-500 animate-pulse flex items-center gap-1">
-                  • typing...
-                </span>
-              )}
-            </div>
+            <h3 className="text-base font-bold text-foreground tracking-tight">{otherUser.name || "User"}</h3>
+
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="dark:text-slate-400 text-slate-600 dark:hover:text-white hover:text-slate-900 transition-colors">
+        <div className="flex items-center gap-4">
+          <div className={cn("transition-all duration-300 overflow-hidden", isSearching ? "w-64 opacity-100" : "w-0 opacity-0")}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search messages..."
+                className="h-10 pl-9 bg-muted/50 border-none w-full"
+                autoFocus={isSearching}
+              />
+            </div>
+          </div>
+          <div className="w-[1px] h-6 bg-border mx-1" />
+          <Button
+            variant={isSearching ? "secondary" : "ghost"}
+            size="icon"
+            onClick={() => {
+              setIsSearching(!isSearching);
+              if (isSearching) setSearchQuery("");
+            }}
+            className="text-muted-foreground hover:text-foreground transition-all rounded-full h-10 w-10"
+          >
             <Search className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="dark:text-slate-400 text-slate-600 dark:hover:text-white hover:text-slate-900 transition-colors">
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground transition-all rounded-full h-10 w-10">
             <MoreVertical className="h-5 w-5" />
           </Button>
         </div>
@@ -221,10 +253,10 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
 
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden relative">
-        <ScrollArea ref={scrollRef} className="h-full p-6">
+        <ScrollArea ref={scrollRef} className="h-full p-4 md:p-6">
           <div className="flex justify-center mb-8">
-            <span className="px-3 py-1 rounded-full dark:bg-slate-900/50 bg-white/50 border dark:border-white/5 border-black/5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-              Conversation Started
+            <span className="px-5 py-1.5 rounded-full bg-muted/30 border border-border/50 text-[11px] font-semibold text-muted-foreground shadow-sm">
+              Today
             </span>
           </div>
 
@@ -244,10 +276,10 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
             ))}
             {otherUserTyping && (
               <div className="flex gap-3 mb-4">
-                <div className="dark:bg-slate-900/50 bg-white/50 p-3 rounded-2xl rounded-tl-none border dark:border-white/5 border-black/5 flex items-center gap-1 w-16 h-10">
-                  <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                  <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                  <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
+                <div className="bg-muted p-3 rounded-2xl rounded-tl-none border border-border flex items-center gap-1 w-16 h-10">
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"></span>
                 </div>
               </div>
             )}
@@ -256,54 +288,83 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
       </div>
 
       {/* Composer */}
-      <div className="p-4 dark:bg-slate-950/80 bg-white/80 backdrop-blur-md border-t dark:border-white/10 border-black/5">
-        <div className="flex items-center gap-3 max-w-4xl mx-auto">
-          <div className="flex-1 dark:bg-slate-900/50 bg-slate-100 border dark:border-white/10 border-black/5 rounded-2xl flex items-center p-1.5 focus-within:border-blue-500/50 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
-            <Input
-              value={inputText}
-              onChange={handleInputStringChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              className="border-none bg-transparent focus-visible:ring-0 dark:text-slate-200 text-slate-900 placeholder:text-slate-500 h-10 px-3"
-              disabled={isSending}
-            />
-            <Popover>
-              <PopoverTrigger asChild>
+      <div className="p-6 bg-background/50 border-t border-border/50">
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+          {otherUserTyping && (
+            <p className="text-[10px] text-muted-foreground/60 ml-4 animate-pulse">
+              {otherUser.name} is typing...
+            </p>
+          )}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-muted/30 border border-border/50 rounded-2xl flex items-center p-2 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-inner">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground rounded-xl h-10 w-10 shrink-0"
+              >
+                <Paperclip className="h-5 w-5" />
+              </Button>
+
+              <Input
+                value={inputText}
+                onChange={handleInputStringChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message..."
+                className="border-none bg-transparent focus-visible:ring-0 text-foreground placeholder:text-muted-foreground h-10 px-4 text-sm"
+                disabled={isSending}
+              />
+
+              {isMounted ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-primary transition-all rounded-xl h-10 w-10 shrink-0"
+                    >
+                      <Smile className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 border-none bg-transparent shadow-none" side="top" align="end">
+                    <EmojiPicker
+                      onEmojiClick={onEmojiClick}
+                      theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+                      lazyLoadEmojis={true}
+                    />
+                  </PopoverContent>
+                </Popover>
+              ) : (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-slate-500 hover:text-blue-400 hover:bg-transparent"
+                  className="text-muted-foreground hover:text-primary transition-all rounded-xl h-10 w-10 shrink-0"
                 >
                   <Smile className="h-5 w-5" />
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0 border-none bg-transparent shadow-none" side="top" align="end">
-                <EmojiPicker
-                  onEmojiClick={onEmojiClick}
-                  theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
-                  lazyLoadEmojis={true}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+              )}
+            </div>
 
-          <Button
-            size="icon"
-            onClick={handleSend}
-            disabled={!inputText.trim() || isSending}
-            className={cn(
-              "h-11 w-11 rounded-full transition-all duration-300 shadow-lg",
-              inputText.trim()
-                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-900/20"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed opacity-50"
-            )}
-          >
-            {isSending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5 ml-0.5" />
-            )}
-          </Button>
+            <Button
+              size="icon"
+              onClick={handleSend}
+              disabled={!inputText.trim() || isSending}
+              className={cn(
+                "h-12 w-12 rounded-full transition-all duration-300 shadow-xl shrink-0",
+                inputText.trim()
+                  ? "bg-primary hover:bg-primary/90 text-white shadow-primary/20"
+                  : "bg-muted text-muted-foreground opacity-50"
+              )}
+            >
+              {isSending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+          <p className="text-center text-[9px] text-muted-foreground/40 mt-1">
+            Press Enter to send, Shift + Enter for new line
+          </p>
         </div>
       </div>
     </div>

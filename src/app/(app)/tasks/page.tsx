@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma/client";
 import { TaskBoard } from "@/components/tasks/task-board";
+import { NavigationBreadcrumb } from "@/components/common/navigation-breadcrumb";
 
 export default async function TasksPage() {
   const supabase = await createClient();
@@ -35,8 +36,11 @@ export default async function TasksPage() {
   }));
 
   return (
-    <div className="h-[calc(100vh-6rem)]">
-      <TaskBoard tasks={tasks} />
+    <div className="h-[calc(100vh-6rem)] flex flex-col space-y-4">
+      <NavigationBreadcrumb pageName="Tasks" />
+      <div className="flex-1 min-h-0">
+        <TaskBoard tasks={tasks} />
+      </div>
     </div>
   );
 }

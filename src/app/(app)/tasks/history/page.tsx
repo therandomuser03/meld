@@ -22,7 +22,7 @@ export default async function TaskHistoryPage() {
     });
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="mx-auto space-y-6">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" asChild size="icon" className="text-slate-400 hover:text-white">
                     <Link href="/tasks"><ArrowLeft className="h-5 w-5" /></Link>

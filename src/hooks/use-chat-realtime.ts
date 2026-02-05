@@ -13,26 +13,42 @@ export function useChatRealtime(threadId: string) {
 
         // Listen for new messages in this thread
         const channel = supabase
-            .channel(`chat_messages:${threadId}`)
+            .channel(`thread:${threadId}`)
+            .on('broadcast', { event: 'new_message' }, (event) => {
+                const message = event.payload;
+                if (message && message.threadId === threadId) {
+                    addMessage(threadId, message);
+                }
+            })
             .on(
                 'postgres_changes',
                 {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'Message',
-                    filter: `threadId=eq.${threadId}`,
+                    // filter: `threadId=eq.${threadId}`, // Removing filter to test if events are arriving at all, will filter in callback
                 },
                 async (payload) => {
+                    const newRecord = payload.new as any;
+                    const msgThreadId = newRecord.threadId || newRecord.threadid;
+
+                    if (msgThreadId !== threadId) return;
+
                     // Fetch the full message with relations once notified
-                    const { data: fullMessage } = await supabase
+                    const { data: fullMessage, error } = await supabase
                         .from('Message')
                         .select(`
                             *,
                             author:UserProfile(id, name, avatarUrl),
                             translations:Translation(*)
                         `)
-                        .eq('id', payload.new.id)
-                        .single();
+                        .eq('id', newRecord.id)
+                        .maybeSingle();
+
+                    if (error) {
+                        console.error("Error fetching realtime message:", error);
+                        return;
+                    }
 
                     if (fullMessage) {
                         addMessage(threadId, fullMessage as any);

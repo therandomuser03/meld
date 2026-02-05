@@ -16,7 +16,6 @@ export async function getThreadMessages(threadId: string) {
             avatarUrl: true,
           },
         },
-        translations: true,
       },
       orderBy: {
         createdAt: 'asc',

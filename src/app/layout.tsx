@@ -49,7 +49,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={initialLocale}>
+    <html lang={initialLocale} suppressHydrationWarning>
       <body
         className={`${inter.variable} antialiased`}
       >

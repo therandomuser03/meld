@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { MessageSquarePlus, Search } from "lucide-react";
+import { MessageSquarePlus, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getConnectedUsers, getOrCreateDirectThread } from "@/actions/chat";
 
-export function NewChatDialog() {
+export function NewChatDialog({ emptyState }: { emptyState?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [connections, setConnections] = React.useState<any[]>([]);
@@ -65,23 +65,34 @@ export function NewChatDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-white/10" title="New Direct Message">
-          <MessageSquarePlus className="h-5 w-5" />
-        </Button>
+        {emptyState ? (
+          <Button
+            size="lg"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            {loading ? "Loading..." : "Start New Chat"}
+          </Button>
+        ) : (
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent" title="New Direct Message">
+            <MessageSquarePlus className="h-5 w-5" />
+          </Button>
+        )}
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-white/10 text-white sm:max-w-[425px]">
+
+      <DialogContent className="bg-card border-border text-card-foreground sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>New Message</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search people..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-slate-950 border-white/10 text-white placeholder:text-slate-500"
+              className="pl-9 bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
@@ -96,26 +107,26 @@ export function NewChatDialog() {
                     <button
                       key={user.id}
                       onClick={() => startChat(user.id)}
-                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors group text-left"
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors group text-left"
                     >
-                      <Avatar className="h-10 w-10 border border-white/10">
+                      <Avatar className="h-10 w-10 border border-border">
                         <AvatarImage src={user.avatarUrl} />
-                        <AvatarFallback className="bg-slate-800 text-slate-400">
+                        <AvatarFallback className="bg-muted text-muted-foreground">
                           {user.name?.substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors">
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                           {user.name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {user.role}
                         </p>
                       </div>
                     </button>
                   ))}
                   {filtered.length === 0 && (
-                    <div className="text-center py-8 text-slate-500 text-sm">
+                    <div className="text-center py-8 text-muted-foreground text-sm">
                       No connections found.
                     </div>
                   )}

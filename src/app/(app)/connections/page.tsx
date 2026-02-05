@@ -2,10 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma/client";
 import { Button } from "@/components/ui/button";
-import { InvitationCard } from "@/components/connections/invitation-card";
 import { UserGrid } from "@/components/connections/user-grid";
 import { NotificationDropdown } from "@/components/connections/notification-dropdown";
 import { getMutualCounts } from "@/lib/actions/connections";
+import { NavigationBreadcrumb } from "@/components/common/navigation-breadcrumb";
 
 export default async function ConnectionsPage() {
     const supabase = await createClient();
@@ -89,6 +89,9 @@ export default async function ConnectionsPage() {
 
     return (
         <div className="space-y-8 pb-10">
+            {/* Navigation Breadcrumb */}
+            <NavigationBreadcrumb pageName="Connections" />
+
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -106,30 +109,13 @@ export default async function ConnectionsPage() {
                 </div>
             </div>
 
-            {/* Invitations Section (Incoming) */}
-            {incomingRequests.length > 0 && (
-                <section className="space-y-4">
-                    <div className="flex items-center justify-between px-1">
-                        <h2 className="text-lg font-semibold dark:text-white text-slate-900">
-                            Invitations <span className="text-blue-500">({incomingRequests.length})</span>
-                        </h2>
-                        <Button variant="link" className="text-blue-400 h-auto p-0 text-sm">Manage all</Button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {incomingRequests.map(req => (
-                            <InvitationCard key={req.id} request={req} />
-                        ))}
-                    </div>
-                </section>
-            )}
-
             {/* Dynamic User Grid Search */}
             <UserGrid
                 currentUserId={user.id}
                 initialSuggestions={suggestions}
                 initialPending={sentRequests.map(r => ({ ...r.toUser, status: "PENDING" as const }))}
                 initialAccepted={connectedUsers.map(u => ({ ...u, status: "CONNECTED" as const }))}
+                initialReceived={incomingRequests}
             />
         </div>
     );

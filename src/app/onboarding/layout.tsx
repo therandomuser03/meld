@@ -17,8 +17,13 @@ export default async function OnboardingLayout({
     // We can assume it exists or handle gracefully.
 
     return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-            <div className="w-full max-w-md space-y-8">
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background Gradient Blob */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-[800px] h-[800px] bg-blue-900/10 rounded-full blur-[120px] opacity-40" />
+            </div>
+
+            <div className="w-full max-w-[500px] space-y-8 relative z-10">
                 {children}
             </div>
         </div>

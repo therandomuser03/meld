@@ -89,9 +89,9 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-text">Tasks</h1>
+        <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
         <div className="flex gap-2">
-          <Button variant="outline" asChild className="border-border text-secondary hover:text-text hover:bg-secondary/50">
+          <Button variant="outline" asChild className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50">
             <a href="/tasks/history" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               View History
@@ -106,18 +106,18 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
           const colTasks = tasks.filter(t => t.status === col.id);
 
           return (
-            <div key={col.id} className="flex flex-col h-full min-h-[500px] rounded-2xl bg-secondary/10 border border-border overflow-hidden">
+            <div key={col.id} className="flex flex-col h-full min-h-[500px] rounded-2xl bg-secondary border border-border/50 overflow-hidden">
               {/* Column Header */}
-              <div className="p-4 flex items-center justify-between border-b border-border bg-secondary/20">
+              <div className="p-4 flex items-center justify-between border-b border-border/50 bg-secondary/50">
                 <div className="flex items-center gap-2">
-                  <span className={cn("text-xs font-bold uppercase tracking-wider text-muted-foreground")}>
+                  <span className={cn("text-[11px] font-bold uppercase tracking-wider text-muted-foreground")}>
                     {col.label}
                   </span>
-                  <Badge variant="secondary" className="bg-background text-secondary hover:bg-background shadow-sm">
+                  <Badge variant="secondary" className="bg-background text-foreground hover:bg-background shadow-sm h-5 px-1.5">
                     {colTasks.length}
                   </Badge>
                 </div>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                <MoreHorizontal className="h-4 w-4 text-muted-foreground/50" />
               </div>
 
               {/* Task List */}
@@ -160,9 +160,9 @@ function TaskCard({
   onDelete: (id: string) => void;
 }) {
   const priorityColor = {
-    HIGH: "dark:text-red-400 text-red-700 dark:bg-red-500/10 bg-red-500/15 dark:border-red-500/20 border-red-500/30",
-    MEDIUM: "dark:text-orange-400 text-orange-800 dark:bg-orange-500/10 bg-orange-500/15 dark:border-orange-500/20 border-orange-500/30",
-    LOW: "dark:text-emerald-400 text-emerald-700 dark:bg-emerald-500/10 bg-emerald-500/15 dark:border-emerald-500/20 border-emerald-500/30",
+    HIGH: "text-destructive bg-destructive/10 border-destructive/20",
+    MEDIUM: "text-accent bg-accent/10 border-accent/20",
+    LOW: "text-primary bg-primary/10 border-primary/20",
   }[task.priority || "MEDIUM"]; // Default to MEDIUM if undefined
 
   const formatDate = () => {
@@ -182,7 +182,7 @@ function TaskCard({
   }
 
   return (
-    <div className="group relative bg-card hover:bg-secondary/50 border border-border hover:border-border/80 rounded-xl p-4 transition-all shadow-sm">
+    <div className="group relative bg-muted/20 hover:bg-secondary border border-border/50 hover:border-primary/20 rounded-xl p-4 transition-all shadow-sm">
       <div className="flex justify-between items-start mb-2">
         <Badge variant="outline" className={cn("text-[10px] uppercase font-bold border", priorityColor)}>
           {task.priority || "Medium"}
@@ -223,14 +223,14 @@ function TaskCard({
         </DropdownMenu>
       </div>
 
-      <h3 className="text-sm font-semibold text-text mb-3 line-clamp-2">
+      <h3 className="text-sm font-semibold text-foreground mb-3 line-clamp-2">
         {task.title}
       </h3>
 
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
-        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] font-medium">
           {task.status === 'DONE' ? (
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
           ) : (
             <Calendar className="h-3.5 w-3.5" />
           )}

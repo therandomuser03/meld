@@ -8,6 +8,12 @@
 :root {
   --font-inter: 'Inter', sans-serif;
   scroll-behavior: smooth;
+
+  /* Animation Variables */
+  --animation-duration-fast: 150ms;
+  --animation-duration-base: 250ms;
+  --animation-duration-slow: 350ms;
+  --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @layer utilities {

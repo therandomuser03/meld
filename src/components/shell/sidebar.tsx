@@ -86,7 +86,7 @@ export function Sidebar({ user }: { user: any }) {
     >
       {/* Logo */}
       <div className={cn("flex h-16 items-center border-b border-border overflow-hidden", isCollapsed ? "justify-center px-0" : "px-6 justify-between")}>
-        <div className="flex items-center gap-3 font-bold text-xl text-sidebar-foreground">
+        <div className="flex items-center gap-3 font-bold text-xl text-sidebar-foreground dark:text-white">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shrink-0">
             <MessageSquareCode className="h-5 w-5 text-white" />
           </div>

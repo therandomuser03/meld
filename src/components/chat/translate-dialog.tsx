@@ -53,16 +53,16 @@ export function TranslateDialog({
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="bg-background border-border text-text">
+            <AlertDialogContent className="dark:bg-slate-900 bg-white dark:border-white/10 border-slate-200">
                 <AlertDialogHeader>
-                    <AlertDialogTitle className="text-text">Translate Message</AlertDialogTitle>
-                    <AlertDialogDescription className="text-secondary">
+                    <AlertDialogTitle className="dark:text-white text-slate-900">Translate Message</AlertDialogTitle>
+                    <AlertDialogDescription className="dark:text-slate-400 text-slate-500">
                         Select a language to translate this message into.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <div className="py-2">
-                    <div className="p-3 bg-secondary/20 rounded-lg text-sm text-secondary mb-4 max-h-32 overflow-y-auto border border-border">
+                    <div className="p-3 dark:bg-slate-800/50 bg-slate-100 rounded-lg text-sm dark:text-slate-300 text-slate-700 mb-4 max-h-32 overflow-y-auto border dark:border-white/5 border-slate-200">
                         {messageContent}
                     </div>
 
@@ -72,7 +72,7 @@ export function TranslateDialog({
                                 key={lang.code}
                                 onClick={() => handleTranslate(lang.code)}
                                 variant="outline"
-                                className="border-border hover:bg-secondary/10 text-secondary hover:text-text justify-start h-10"
+                                className="border dark:border-white/10 border-slate-200 hover:bg-slate-400 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-700 justify-start h-10"
                                 disabled={!!loadingLocale}
                             >
                                 {loadingLocale === lang.code ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
@@ -80,7 +80,7 @@ export function TranslateDialog({
                             </Button>
                         ))}
                         {userLanguages.length === 0 && (
-                            <p className="col-span-2 text-center text-xs text-secondary py-4">
+                            <p className="col-span-2 text-center text-xs dark:text-slate-500 text-slate-500 py-4">
                                 No preferred languages set in profile.
                                 <br />
                                 <span className="text-[10px] mt-1 inline-block">Go to settings to add languages.</span>
@@ -90,7 +90,7 @@ export function TranslateDialog({
                 </div>
 
                 <AlertDialogFooter className="mt-2">
-                    <AlertDialogCancel className="bg-secondary/50 border-border text-secondary hover:bg-secondary hover:text-text">
+                    <AlertDialogCancel className="dark:bg-white/5 bg-slate-100 border-none dark:text-slate-400 text-slate-600 hover:bg-slate-200 dark:hover:bg-white/10 dark:hover:text-white">
                         Cancel
                     </AlertDialogCancel>
                 </AlertDialogFooter>

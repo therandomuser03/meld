@@ -25,7 +25,7 @@ export function NoteList({ notes }: { notes: any[] }) {
             <ScrollArea className="flex-1">
                 <div className="flex flex-col">
                     {filteredNotes.length === 0 && (
-                        <div className="p-8 text-center text-slate-500 text-sm">
+                        <div className="p-8 text-center text-muted-foreground text-sm">
                             No notes found.
                         </div>
                     )}
@@ -36,18 +36,18 @@ export function NoteList({ notes }: { notes: any[] }) {
                                 key={note.id}
                                 href={`/notes/${note.id}`}
                                 className={cn(
-                                    "p-4 border-b border-white/5 transition-colors hover:bg-white/5",
-                                    isActive ? "bg-blue-600/5 border-l-2 border-l-blue-500" : "border-l-2 border-l-transparent"
+                                    "p-4 border-b border-border transition-colors hover:bg-secondary/50",
+                                    isActive ? "bg-primary/10 border-l-2 border-l-primary" : "border-l-2 border-l-transparent"
                                 )}
                             >
-                                <h4 className={cn("font-medium text-sm mb-1", isActive ? "text-blue-400" : "text-white")}>
+                                <h4 className={cn("font-semibold text-sm mb-1", isActive ? "text-primary" : "text-foreground")}>
                                     {note.title}
                                 </h4>
-                                <p className="text-xs text-slate-400 line-clamp-2 mb-2">
+                                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                                     {note.body.replace(/[#*`]/g, '') /* Simple strip markdown */}
                                 </p>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-slate-600">
+                                    <span className="text-[10px] text-muted-foreground opacity-60">
                                         {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
                                     </span>
                                 </div>

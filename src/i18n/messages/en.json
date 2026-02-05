@@ -11,9 +11,14 @@
   "dashboard.greeting.afternoon": "Good Afternoon",
   "dashboard.greeting.evening": "Good Evening",
   "dashboard.overview": "Here is your daily overview for {{date}}.",
+  "dashboard.stats.notes": "Notes",
   "dashboard.stats.unread": "Unread Messages",
+  "dashboard.stats.activeChats": "Active Chats",
   "dashboard.stats.pinned": "Pinned Notes",
   "dashboard.stats.pending": "Pending Tasks",
+  "dashboard.chart.activity": "Activity Trends",
+  "dashboard.chart.heatmap": "Collaboration Map",
+  "dashboard.recentActivity": "Recent Activity",
   "dashboard.recentMessages": "Recent Messages",
   "dashboard.viewAll": "View all",
   "dashboard.noMessages": "No recent messages.",
@@ -25,6 +30,8 @@
   "dashboard.noNotes": "No pinned notes.",
   "dashboard.updatedAt": "Updated {{time}}",
   "common.save": "Save",
+
+
   "common.cancel": "Cancel",
   "common.delete": "Delete",
   "common.edit": "Edit",

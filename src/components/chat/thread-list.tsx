@@ -64,31 +64,32 @@ export function ThreadList({ initialThreads = [], currentUserId }: ThreadListPro
   });
 
   return (
-    <div className="w-80 border-r dark:border-white/10 border-black/5 dark:bg-slate-950 bg-slate-200 flex flex-col h-full">
+    <div className="w-80 border-r border-border flex flex-col h-full animate-in fade-in slide-in-from-bottom-2 duration-500">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold dark:text-white text-slate-900">Chats</h2>
-        <div className="flex items-center gap-1">
+      <div className="p-6 flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">Chats</h2>
+        <div className="flex items-center gap-2">
           <NewChatDialog />
+          {/* CreateGroupDialog is removed or moved if not in reference, but keeping for functionality */}
           <CreateGroupDialog />
         </div>
       </div>
 
       {/* Search */}
-      <div className="px-4 pb-4">
+      <div className="px-6 pb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search contacts..."
-            className="dark:bg-slate-900 bg-slate-100 dark:border-white/10 border-black/5 pl-9 dark:text-slate-200 text-slate-900 placeholder:text-slate-500 focus-visible:ring-blue-600 rounded-xl"
+            className="bg-background border-none pl-9 py-6 text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/20 rounded-xl"
           />
         </div>
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-3 space-y-1">
         {threads.length === 0 ? (
-          <div className="p-4 text-center text-slate-500 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             No conversations yet. Start a new chat!
           </div>
         ) : (
@@ -100,38 +101,43 @@ export function ThreadList({ initialThreads = [], currentUserId }: ThreadListPro
                 key={thread.id}
                 href={`/chat/${thread.id}`}
                 className={cn(
-                  "flex gap-3 p-3 mx-2 rounded-xl transition-all cursor-pointer group",
-                  isActive ? "dark:bg-white/5 bg-white/50 shadow-sm" : "dark:hover:bg-white/5 hover:bg-black/5"
+                  "flex gap-4 p-4 rounded-3xl transition-all cursor-pointer group",
+                  isActive
+                    ? "bg-bg-900 shadow-lg border border-border/50 translate-x-1"
+                    : "hover:bg-muted/30"
                 )}
               >
-                <div className="relative">
-                  <Avatar className="h-10 w-10 dark:border-white/10 border-black/5">
+                <div className="relative shrink-0">
+                  <Avatar className="h-12 w-12 border border-border/50">
                     <AvatarImage src={thread.avatar} />
-                    <AvatarFallback className="dark:bg-slate-800 bg-slate-300 dark:text-slate-300 text-slate-600">
+                    <AvatarFallback className="bg-muted text-muted-foreground font-bold">
                       {thread.type === 'ROOM' ? (
-                        <Users className="h-5 w-5 dark:text-slate-400 text-slate-600" />
+                        <Users className="h-6 w-6 text-muted-foreground" />
                       ) : (
                         thread.fallback
                       )}
                     </AvatarFallback>
                   </Avatar>
                   {thread.online && (
-                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 dark:border-slate-950 border-white" />
+                    <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-secondary" />
                   )}
                 </div>
 
-                <div className="flex-1 overflow-hidden">
-                  <div className="flex justify-between items-baseline mb-0.5">
-                    <span className={cn("font-medium truncate text-sm", isActive ? "dark:text-white text-blue-600" : "dark:text-slate-300 text-slate-700")}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-baseline mb-1">
+                    <span className={cn(
+                      "font-semibold truncate text-base",
+                      isActive ? "text-text-50" : "text-foreground"
+                    )}>
                       {thread.name}
                     </span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-[11px] text-muted-foreground font-medium shrink-0">
                       <DateDisplay date={thread.updatedAt} format="relative" />
                     </span>
                   </div>
                   <p className={cn(
-                    "text-xs truncate",
-                    thread.unread ? "text-blue-400 font-medium" : "dark:text-slate-500 text-slate-500"
+                    "text-sm truncate",
+                    thread.unread ? "text-primary font-semibold" : "text-muted-foreground"
                   )}>
                     {thread.lastMessage}
                   </p>

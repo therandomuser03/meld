@@ -7,223 +7,212 @@ import {
   MoreHorizontal,
   Clock,
   Plus,
-  FileText,
-  Loader2
+  ArrowUpRight,
+  ArrowDownRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import React from "react";
 
-// 1. Top Stat Card
+// 1. Stat Card (Refactored for Moneywise look)
 export function StatCard({
   labelId,
   count,
   badgeText,
   badgeColor,
-  icon
+  icon,
+  trend,
+  trendUp
 }: {
   labelId: string;
-  count: number;
+  count: number | string;
   badgeText?: string;
   badgeColor?: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  trend?: string;
+  trendUp?: boolean;
 }) {
   const { t } = useTranslation();
   return (
-    <div className="rounded-2xl border border-white/10 bg-blue-700/50 dark:bg-slate-900/50 p-6 flex flex-col justify-between h-[140px]">
-      <div className="flex justify-between items-start">
-        <div className={cn("p-2 rounded-lg bg-slate-800", badgeColor ? "text-white" : "text-blue-400")}>
-          {icon}
+    <div className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between h-[160px] relative overflow-hidden group shadow-sm">
+      {/* Background Gradient Effect - Adjusted for light/dark compatibility */}
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+      <div className="relative z-10 h-full flex flex-col justify-between">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_var(--color-primary)] opacity-80" />
+          <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wider">
+            {t(labelId)}
+          </p>
         </div>
-        {badgeText && (
-          <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border",
-            badgeColor === "red" ? "bg-red-500/15 border-red-500/50 dark:text-red-400 text-red-700" :
-              badgeColor === "orange" ? "bg-orange-500/15 border-orange-500/50 dark:text-orange-400 text-orange-800" :
-                "bg-blue-500/15 border-blue-500/50 dark:text-blue-400 text-blue-800"
-          )}>
-            {badgeText}
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-sm dark:text-slate-400 text-blue-100 font-medium mb-1">
-          {t(labelId)}
-        </p>
-        <h3 className="text-3xl font-bold text-white">{count}</h3>
+
+        <div>
+          <h3 className="text-4xl font-bold text-card-foreground tracking-tight mb-2">{count}</h3>
+
+          <div className="flex items-center gap-2">
+            {(trend || badgeText) && (
+              <div className={cn("px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1",
+                badgeColor === "orange" ? "bg-accent/10 text-accent" :
+                  badgeColor === "red" ? "bg-destructive/10 text-destructive" :
+                    badgeColor === "green" ? "bg-primary/20 text-primary" :
+                      "bg-primary/10 text-primary"
+              )}>
+                {trend || badgeText}
+              </div>
+            )}
+
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-// 2. Recent Messages List
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { AvatarImage } from "@/components/ui/avatar";
+// 2. Recent Activity Section (Replaces Chart)
+export function RecentActivitySection({ threads }: { threads: any[] }) {
+  const { t } = useTranslation();
 
-export function RecentMessagesCard({ threads }: { threads: any[] }) {
+  return (
+    <div className="h-full flex flex-col p-6 rounded-3xl border border-border bg-card relative overflow-hidden shadow-sm">
+      <div className="flex justify-between items-start mb-6 relative z-10">
+        <div>
+          <h3 className="text-lg font-semibold text-card-foreground mb-1">{t('dashboard.recentActivity', 'Recent Activity')}</h3>
+          <p className="text-sm text-muted-foreground">Latest conversations and updates</p>
+        </div>
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground dark:hover:bg-white/5 hover:bg-black/5">
+          <MoreHorizontal className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <div className="relative z-10 flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-1">
+        {threads.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm">
+            <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
+            No recent activity
+          </div>
+        )}
+        {threads.slice(0, 5).map((thread, i) => (
+          <Link
+            href={`/chat/${thread.id}`}
+            key={i}
+            className="flex items-center gap-4 group cursor-pointer hover:bg-accent/50 p-3 rounded-xl transition-colors border border-transparent hover:border-border animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
+            style={{ animationDelay: `${i * 100}ms` }}
+          >
+            <Avatar className="h-10 w-10 border border-border shadow-sm">
+              <AvatarImage src={thread.avatar} />
+              <AvatarFallback className="bg-muted text-xs text-muted-foreground font-medium">{thread.initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-baseline mb-0.5">
+                <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{thread.name}</p>
+                <span className="text-[10px] text-muted-foreground font-mono">{thread.time}</span>
+              </div>
+              <p className="text-xs text-muted-foreground truncate group-hover:text-foreground transition-colors">{thread.preview}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 2. Pinned Notes Card (Updated for Row 2)
+export function PinnedNotesCard({ notes }: { notes: any[] }) {
   const { t } = useTranslation();
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col p-6 rounded-3xl border border-border bg-card shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg dark:text-white text-slate-900">
-          {t("dashboard.recentMessages")}
+        <h3 className="font-semibold text-lg text-card-foreground">
+          {t("dashboard.stats.pinned", "Pinned Notes")}
         </h3>
-        <Link href="/chat" className="text-sm dark:text-blue-400 text-blue-700 hover:underline transition-all">
-          {t("dashboard.viewAll")}
+        <Link href="/notes">
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full">
+            <Plus className="h-4 w-4" />
+          </Button>
         </Link>
       </div>
-
-      <div className="rounded-2xl border border-white/10 bg-blue-700/50 dark:bg-slate-900/50 p-6 flex-1 flex flex-col">
-        <ScrollArea className="flex-1 -mr-4 pr-4">
-          <div className="space-y-4 pt-2">
-            {threads.length === 0 && (
-              <p className="text-sm dark:text-slate-500 text-blue-100/60">
-                {t("dashboard.noMessages")}
+      <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+        {notes.slice(0, 5).map((note, i) => (
+          <Link
+            href={`/notes/${note.id}`}
+            key={i}
+            className="block group animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
+            style={{ animationDelay: `${i * 100}ms` }}
+          >
+            <div className="p-3 rounded-xl bg-secondary/50 border border-border/50 hover:bg-secondary transition-colors">
+              <div className="flex items-center gap-2 mb-1">
+                <Pin className="h-3 w-3 text-primary rotate-45" />
+                <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{note.title}</p>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-1 pl-5">
+                {note.excerpt || "No content"}
               </p>
-            )}
-            {threads.map((thread, i) => (
-              <Link href={`/chat/${thread.id}`} key={i} className="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-white/5 transition-colors">
-                <Avatar className="h-10 w-10 border border-white/10">
-                  <AvatarImage src={thread.avatar} />
-                  <AvatarFallback className="bg-slate-800 text-slate-300">{thread.initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 overflow-hidden">
-                  <div className="flex justify-between items-center mb-0.5">
-                    <h4 className="font-medium text-white truncate">{thread.name}</h4>
-                    <span className="text-xs dark:text-slate-500 text-blue-100/60">{thread.time}</span>
-                  </div>
-                  <p className="text-sm dark:text-slate-400 text-blue-100/80 truncate group-hover:opacity-80 transition-opacity">
-                    {thread.preview}
-                  </p>
-                </div>
-              </Link>
-            ))}
+            </div>
+          </Link>
+        ))}
+        {notes.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm">
+            <Pin className="h-8 w-8 mb-2 opacity-20" />
+            <p>No pinned notes</p>
           </div>
-        </ScrollArea>
+        )}
       </div>
     </div>
   );
 }
 
-// 3. Pending Tasks
-export function PendingTasksCard({ tasks }: { tasks: any[] }) {
+// 4. Pending Tasks Section (Replaces Heatmap)
+export function PendingTasksSection({ tasks }: { tasks: any[] }) {
   const { t } = useTranslation();
+
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg dark:text-white text-slate-900">
-          {t("dashboard.pendingTasks")}
-        </h3>
+    <div className="h-full flex flex-col p-6 rounded-3xl border border-border bg-card relative shadow-sm">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-card-foreground">{t('dashboard.pendingTasks', 'Pending Tasks')}</h3>
+          <p className="text-sm text-muted-foreground">High priority items needing attention</p>
+        </div>
         <Link href="/tasks">
-          <Button size="sm" className="h-8 bg-blue-600 hover:bg-blue-700 text-xs text-white">
-            <Plus className="h-3.5 w-3.5 mr-1" />
-            {t("dashboard.newTask")}
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground dark:hover:bg-white/5 hover:bg-black/5">
+            <Plus className="h-5 w-5" />
           </Button>
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-blue-700/50 dark:bg-slate-900/50 p-6 flex-1 flex flex-col">
-        <ScrollArea className="flex-1 -mr-4 pr-4">
-          <div className="space-y-4 pt-2">
-            {tasks.length === 0 && (
-              <p className="text-sm dark:text-slate-500 text-blue-100/60">
-                {t("dashboard.noTasks")}
-              </p>
-            )}
-            {tasks.map((task, i) => (
-              <div key={i} className="flex gap-3 items-start group">
-                <button className={cn(
-                  "mt-0.5 h-5 w-5 rounded border flex items-center justify-center transition-all",
-                  task.done
-                    ? "bg-blue-600 border-blue-600 text-white"
-                    : "border-slate-600 hover:border-slate-500"
-                )}>
-                  {task.done && <CheckCircle2 className="h-3.5 w-3.5" />}
-                </button>
-                <div className="flex-1">
-                  <p className={cn("text-sm font-medium transition-colors", task.done ? "dark:text-slate-500 text-white/40 line-through" : "text-white")}>
-                    {task.title}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    {task.dueText && (
-                      <span className={cn("text-[10px] px-1.5 py-0.5 rounded border",
-                        task.urgent
-                          ? "bg-red-500/15 border-red-500/50 text-red-400"
-                          : "bg-orange-500/15 border-orange-500/50 text-orange-400"
-                      )}>
-                        {task.dueText}
-                      </span>
-                    )}
-                    <span className="text-xs dark:text-slate-500 text-blue-200/60">{task.project}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+        {tasks.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm">
+            <CheckCircle2 className="h-8 w-8 mb-2 opacity-50" />
+            All caught up!
           </div>
-        </ScrollArea>
-      </div>
-    </div>
-  );
-}
-
-import { createNote } from "@/lib/actions/notes";
-import React from "react";
-
-// 4. Pinned Notes
-export function PinnedNotesCard({ notes }: { notes: any[] }) {
-  const [isPending, startTransition] = React.useTransition();
-  const { t } = useTranslation();
-
-  const handleCreate = () => {
-    startTransition(async () => {
-      try {
-        await createNote();
-      } catch (err) {
-        // redirect will happen on success, but just in case
-        console.error(err);
-      }
-    });
-  };
-
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg dark:text-white text-slate-900">
-          {t("dashboard.pinnedNotes")}
-        </h3>
-        <Button
-          size="sm"
-          className="h-8 bg-blue-600 hover:bg-blue-700 text-xs text-white"
-          onClick={handleCreate}
-          disabled={isPending}
-        >
-          {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-          ) : (
-            <Plus className="h-3.5 w-3.5 mr-1" />
-          )}
-          {t("dashboard.newNote")}
-        </Button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-        {notes.length === 0 && (
-          <p className="text-sm dark:text-slate-500 text-slate-600 col-span-2">
-            {t("dashboard.noNotes")}
-          </p>
         )}
-        {notes.map((note, i) => (
-          <div key={i} className="rounded-2xl bg-blue-700/50 dark:bg-white/5 border border-white/5 p-4 hover:border-white/10 transition-colors cursor-pointer group flex flex-col justify-between">
-            <div>
-              <div className="flex items-start justify-between mb-2">
-                <IconByType type={note.type} />
-              </div>
-              <h4 className="font-medium text-white mb-1 line-clamp-1">{note.title}</h4>
-              <p className="text-xs dark:text-slate-400 text-blue-100/80 line-clamp-2">{note.excerpt}</p>
+        {tasks.map((task, i) => (
+          <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-secondary/50 border border-border/50 hover:bg-secondary transition-all group">
+            <div className={cn("flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center border border-border",
+              task.urgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+            )}>
+              {task.urgent ? <Clock className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
             </div>
-            <p className="text-[10px] dark:text-slate-600 text-slate-200 mt-3 group-hover:opacity-80">
-              {t("dashboard.updatedAt", { time: note.updatedAt })}
-            </p>
+
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate group-hover:text-foreground transition-colors">{task.title}</p>
+              <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {task.dueText || "No Date"}
+                </span>
+                {task.urgent && (
+                  <span className="bg-red-500/20 text-red-500 px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wide uppercase">High</span>
+                )}
+              </div>
+            </div>
+
+            <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 rounded-full hover:bg-accent">
+              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </div>
         ))}
       </div>
@@ -231,29 +220,48 @@ export function PinnedNotesCard({ notes }: { notes: any[] }) {
   )
 }
 
-function IconByType({ type }: { type: string }) {
-  if (type === 'text') return <FileText className="h-4 w-4 text-orange-400" />
-  if (type === 'idea') return <span className="text-sm">💡</span>
-  return <FileText className="h-4 w-4 text-blue-300" />
-}
-
-// 5. Next Meeting (Blue Card)
-export function NextMeetingCard() {
+// 3. Pending Tasks List (For Row 2)
+export function PendingTasksList({ tasks }: { tasks: any[] }) {
+  const { t } = useTranslation();
   return (
-    <div className="rounded-2xl bg-blue-600 p-6 text-white h-full relative overflow-hidden">
-      {/* Decor */}
-      <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-500/30 rounded-full blur-2xl" />
-
-      <div className="relative z-10 flex flex-col justify-between h-full">
-        <div>
-          <span className="text-xs font-medium text-blue-200">Next Meeting</span>
-          <h3 className="text-xl font-bold mt-1">Product Sync</h3>
-        </div>
-
-        <div className="flex items-center gap-2 text-sm bg-blue-700/50 w-fit px-3 py-1.5 rounded-lg border border-blue-500/30">
-          <Clock className="h-4 w-4" />
-          <span>3:00 PM - 4:00 PM</span>
-        </div>
+    <div className="h-full flex flex-col p-6 rounded-3xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-lg text-card-foreground">
+          {t('dashboard.pendingTasks', 'Pending Tasks')}
+        </h3>
+        <Link href="/tasks">
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
+      <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+        {tasks.slice(0, 5).map((task, i) => (
+          <div
+            key={i}
+            className="flex gap-3 items-center p-3 rounded-xl bg-secondary/50 border border-border/50 hover:bg-secondary transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
+            style={{ animationDelay: `${i * 100}ms` }}
+          >
+            <div className={cn("h-8 w-8 rounded-full flex items-center justify-center border border-border bg-muted text-muted-foreground",
+              task.urgent && "bg-destructive/10 text-destructive border-destructive/10"
+            )}>
+              {task.urgent ? <Clock className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate group-hover:text-foreground transition-colors">{task.title}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] text-muted-foreground">{task.dueText || "No due date"}</span>
+                {task.urgent && <span className="text-[10px] text-red-500 bg-red-500/10 px-1.5 rounded-sm font-bold uppercase tracking-wide">High</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+        {tasks.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm">
+            <CheckCircle2 className="h-8 w-8 mb-2 opacity-20" />
+            <p>{t("dashboard.noTasks")}</p>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -80,7 +80,7 @@ export function InvitationCard({ request }: InvitationCardProps) {
                     variant="ghost"
                     onClick={() => handleAction('reject')}
                     disabled={isLoading}
-                    className="h-7 text-xs dark:text-slate-400 text-slate-600 dark:hover:text-white hover:text-slate-900 dark:hover:bg-white/5 hover:bg-black/5"
+                    className="h-7 text-xs dark:text-slate-400 text-slate-600 hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-colors"
                 >
                     Decline
                 </Button>

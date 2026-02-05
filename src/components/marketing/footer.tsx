@@ -33,7 +33,7 @@ export function Footer() {
           </div>
 
           <Link
-            href="#"
+            href="https://github.com/therandomuser03/meld"
             className="text-muted-foreground hover:text-foreground transition"
             aria-label="GitHub"
           >

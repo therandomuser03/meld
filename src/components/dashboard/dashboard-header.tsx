@@ -10,12 +10,12 @@ export function DashboardHeader({ firstName, date }: { firstName: string; date: 
     const { t } = useTranslation();
 
     return (
-        <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight dark:text-white text-slate-900 text-glow">
-                {t(greetingId)}, {firstName}
+        <div className="space-y-1 mb-8">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                {t(greetingId)}, {firstName}!
             </h1>
-            <p className="dark:text-slate-400 text-slate-600">
-                {t("dashboard.overview", { date })}
+            <p className="text-muted-foreground">
+                Here&apos;s your activity summary for {date}
             </p>
         </div>
     );

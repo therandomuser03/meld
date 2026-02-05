@@ -64,7 +64,7 @@ export function NoteNav({ notes, sharedNotes = [], sharedWithOthersNotes = [] }:
   };
 
   return (
-    <div className="flex flex-col h-full p-4 w-80">
+    <div className="flex flex-col h-full p-4 w-80 animate-in fade-in slide-in-from-bottom-2 duration-500">
       {/* Search Header */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />

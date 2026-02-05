@@ -1,16 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   StatCard,
-  RecentMessagesCard,
-  PendingTasksCard,
   PinnedNotesCard,
+  PendingTasksList
 } from "@/components/dashboard/overview-cards";
 import { MessageSquare, Pin, CheckCircle2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import prisma from "@/lib/prisma/client";
-import { getUnreadCount, getUserThreads } from "@/actions/chat";
-
+import { getUnreadCount } from "@/actions/chat";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { NavigationBreadcrumb } from "@/components/common/navigation-breadcrumb";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -23,47 +22,38 @@ export default async function DashboardPage() {
     where: { id: user.id },
   });
 
-  // 2. Fetch Dashboard Metrics
+  const today = format(new Date(), "do MMMM"); // e.g. 5th February
+  const name = profile?.name || user.user_metadata?.full_name || user.user_metadata?.name || "User";
+  const firstName = name.split(' ')[0];
+
+  // 1. Fetch Dashboard Metrics
   const unreadCount = await getUnreadCount(user.id);
-  const pinnedNotesCount = await prisma.note.count({
-    where: { authorId: user.id, pinned: true }
+  const pendingNotesCount = await prisma.note.count({
+    where: { authorId: user.id }
   });
   const pendingTasksCount = await prisma.task.count({
     where: { authorId: user.id, status: { in: ['TODO', 'IN_PROGRESS'] } }
   });
 
-  // 3. Fetch Recent Data
-  // Messages
-  const rawThreads = await getUserThreads(user.id);
-  const recentThreads = rawThreads.slice(0, 5).map(t => {
-    let name = "Unknown";
-    let initials = "??";
-    let avatar = "";
-    if (t.type === "DIRECT") {
-      const other = t.userAId === user.id ? t.userB : t.userA;
-      name = other?.name || "Unknown";
-      avatar = other?.avatarUrl || "";
-      initials = name.substring(0, 2).toUpperCase();
-    } else {
-      name = t.room?.name || "Group";
-      initials = name.substring(0, 2).toUpperCase();
-    }
-    return {
-      id: t.id,
-      name,
-      initials,
-      avatar,
-      time: t.updatedAt ? formatDistanceToNow(new Date(t.updatedAt), { addSuffix: true }) : "",
-      preview: t.messages?.[0]?.content || "No messages"
-    }
+  // 2. Fetch Content Data
+  // Pinned Notes (Latest 5)
+  const rawNotes = await prisma.note.findMany({
+    where: { authorId: user.id, pinned: true },
+    orderBy: { updatedAt: 'desc' },
+    take: 5
   });
+  const pinnedNotes = rawNotes.map(n => ({
+    id: n.id,
+    title: n.title,
+    excerpt: n.body?.substring(0, 60).replace(/[#*_]/g, '') + (n.body?.length > 60 ? "..." : ""), // Clean md chars
+    updatedAt: formatDistanceToNow(new Date(n.updatedAt), { addSuffix: true })
+  }));
 
-
-  // Pending Tasks
+  // Pending Tasks (Latest 5)
   const rawTasks = await prisma.task.findMany({
     where: { authorId: user.id, status: { in: ['TODO', 'IN_PROGRESS'] } },
     orderBy: { createdAt: 'desc' }, // or priority
-    take: 10
+    take: 5
   });
   const pendingTasks = rawTasks.map(t => ({
     title: t.title,
@@ -73,70 +63,47 @@ export default async function DashboardPage() {
     done: false
   }));
 
-  // Pinned Notes
-  const rawNotes = await prisma.note.findMany({
-    where: { authorId: user.id, pinned: true },
-    orderBy: { updatedAt: 'desc' },
-    take: 4
-  });
-  const pinnedNotes = rawNotes.map(n => ({
-    title: n.title,
-    excerpt: n.body?.substring(0, 60) + (n.body?.length > 60 ? "..." : ""),
-    type: "text", // logic for type if needed
-    updatedAt: formatDistanceToNow(new Date(n.updatedAt), { addSuffix: true })
-  }));
-
-  const today = format(new Date(), "MMMM do");
-
-  const name = profile?.name || user.user_metadata?.full_name || user.user_metadata?.name || "User";
-  const firstName = name.split(' ')[0];
-
   return (
-    <div className="space-y-8 pb-8">
-      {/* Header */}
-      <DashboardHeader firstName={firstName} date={today} />
-
-      {/* Top Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          labelId="dashboard.stats.unread"
-          count={unreadCount}
-          badgeText={unreadCount > 0 ? "New messages" : undefined}
-          badgeColor="blue"
-          icon={<MessageSquare className="h-5 w-5" />}
-        />
-        <StatCard
-          labelId="dashboard.stats.pinned"
-          count={pinnedNotesCount}
-          icon={<Pin className="h-5 w-5" />}
-        />
-        <StatCard
-          labelId="dashboard.stats.pending"
-          count={pendingTasksCount}
-          badgeText={pendingTasksCount > 0 ? "Action required" : undefined}
-          badgeColor="orange"
-          icon={<CheckCircle2 className="h-5 w-5" />}
-        />
+    <div className="relative">
+      {/* Fixed Background Tint Layer */}
+      <div className="absolute inset-x-0 top-0 h-[600px] pointer-events-none -z-10 opacity-30 dark:opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent" />
       </div>
 
-      {/* Main Grid: 2 Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[600px]">
+      <div className="space-y-6">
+        {/* Navigation Breadcrumb */}
+        <NavigationBreadcrumb pageName="Dashboard" />
 
-        {/* Left Column */}
-        <div className="space-y-6 flex flex-col h-full">
-          <div className="flex-1 min-h-0">
-            <RecentMessagesCard threads={recentThreads} />
-          </div>
-          <div className="h-[200px] shrink-0">
-            <PinnedNotesCard notes={pinnedNotes} />
-          </div>
+        {/* Header - Preserved Greeting */}
+        <DashboardHeader firstName={firstName} date={today} />
+
+        {/* Row 1: Metrics (3 Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard
+            labelId="dashboard.stats.unread"
+            count={unreadCount}
+            badgeText={unreadCount > 0 ? "New messages" : undefined}
+            badgeColor="blue"
+            icon={<MessageSquare className="h-5 w-5" />}
+          />
+          <StatCard
+            labelId="dashboard.stats.pending"
+            count={pendingTasksCount}
+            badgeText={pendingTasksCount > 0 ? "Action required" : undefined}
+            badgeColor="orange"
+            icon={<CheckCircle2 className="h-5 w-5" />}
+          />
+          <StatCard
+            labelId="dashboard.stats.notes"
+            count={pendingNotesCount}
+            icon={<Pin className="h-5 w-5" />}
+          />
         </div>
 
-        {/* Right Column */}
-        <div className="flex flex-col h-full">
-          <div className="flex-1 min-h-0">
-            <PendingTasksCard tasks={pendingTasks} />
-          </div>
+        {/* Row 2: Content Cards (2 Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
+          <PinnedNotesCard notes={pinnedNotes} />
+          <PendingTasksList tasks={pendingTasks} />
         </div>
       </div>
     </div>

@@ -24,6 +24,17 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/providers/language-provider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -34,6 +45,7 @@ const profileSchema = z.object({
   autoTranslate: z.boolean(),
   gender: z.enum(["MALE", "FEMALE", "NON_BINARY", "PREFER_NOT_TO_SAY", "OTHER"]),
   languages: z.array(z.string()).min(1, "Select at least one language"),
+  avatarUrl: z.string().optional().nullable(),
 });
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -56,6 +68,8 @@ interface ProfileFormProps {
 
 export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: ProfileFormProps) {
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
   const { setLocale } = useLanguage();
@@ -71,6 +85,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
       autoTranslate: true,
       gender: user.gender || "PREFER_NOT_TO_SAY",
       languages: selectedLanguageIds,
+      avatarUrl: user.avatarUrl || null,
     },
   });
 
@@ -98,13 +113,60 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
       toast.success("Profile updated successfully");
       router.refresh(); // Refresh to get updated server data
     } catch (error) {
-      toast.error("Failed to update profile");
+      toast.error(error instanceof Error ? error.message : "Failed to update profile");
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      form.setValue('avatarUrl', publicUrl, { shouldDirty: true });
+      toast.success("Image uploaded!");
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error("Error uploading avatar");
+    } finally {
+      setIsUploading(false);
+      // Reset input so duplicate selection triggers change
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    form.setValue('avatarUrl', null, { shouldDirty: true });
+    toast.info("Avatar removed. Click Save to apply.");
+  };
+
   const selectedLanguages = form.watch("languages");
+  const avatarUrl = form.watch("avatarUrl");
 
   const toggleLanguage = (id: string) => {
     const current = selectedLanguages || [];
@@ -123,13 +185,13 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between bg-slate-900/50 p-6 rounded-2xl border border-white/5">
+      <div className="flex items-center justify-between dark:bg-slate-900/50 bg-white p-6 rounded-2xl border dark:border-white/5 border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Profile Settings</h1>
-          <p className="text-slate-400 text-sm">Update your personal information and how others see you on SetChat.</p>
+          <h1 className="text-2xl font-bold dark:text-white text-slate-900 mb-1">Profile Settings</h1>
+          <p className="dark:text-slate-400 text-slate-500 text-sm">Update your personal information and how others see you on Meld.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="ghost" onClick={() => form.reset()} className="text-slate-400 hover:text-white hover:bg-white/5">Discard</Button>
+          <Button variant="ghost" onClick={() => form.reset()} className="dark:text-slate-400 text-slate-500 hover:text-red-500 hover:bg-red-500/10">Discard</Button>
           <Button
             onClick={form.handleSubmit(onSubmit)}
             disabled={isSaving}
@@ -141,11 +203,11 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
       </div>
 
       {/* Section 1: Avatar */}
-      <section className="bg-slate-900/50 border border-white/5 rounded-2xl p-8">
+      <section className="dark:bg-slate-900/50 bg-white border dark:border-white/5 border-slate-200 rounded-2xl p-8">
         <div className="flex items-start gap-8">
           <div className="relative group">
-            <Avatar className="h-32 w-32 border-4 border-slate-950 shadow-2xl">
-              <AvatarImage src={user.avatarUrl || ""} />
+            <Avatar className="h-32 w-32 border-4 dark:border-slate-950 border-white shadow-2xl">
+              <AvatarImage src={avatarUrl || ""} />
               <AvatarFallback className="bg-orange-200 text-orange-700 text-3xl font-bold">
                 {user.name?.substring(0, 2).toUpperCase() || "SC"}
               </AvatarFallback>
@@ -153,28 +215,64 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
           </div>
           <div className="space-y-4 pt-2">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-1">Profile Picture</h3>
+              <h3 className="text-lg font-semibold dark:text-white text-slate-900 mb-1">Profile Picture</h3>
               <p className="text-sm text-slate-500 max-w-sm leading-relaxed">
                 We recommend an image of at least 400x400px. GIFs are supported for Pro users.
               </p>
             </div>
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleFileChange}
+            />
             <div className="flex gap-3">
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20">
-                <Upload className="h-4 w-4 mr-2" /> Upload New
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                type="button"
+              >
+                {isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                Upload New
               </Button>
-              <Button size="sm" variant="outline" className="bg-white/5 border-white/10 text-slate-300 hover:text-white hover:bg-white/10">
-                <Trash2 className="h-4 w-4 mr-2" /> Remove
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="dark:bg-white/5 bg-slate-50 dark:border-white/10 border-slate-200 dark:text-slate-300 text-slate-600 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/20"
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" /> Remove
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="dark:bg-slate-900 bg-white dark:border-white/10 border-slate-200">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="dark:text-white text-slate-900">Remove profile picture?</AlertDialogTitle>
+                    <AlertDialogDescription className="dark:text-slate-400 text-slate-500">
+                      This will remove your current profile picture and revert to your initials. You need to save changes to make this permanent.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-transparent dark:text-slate-300 text-slate-600 dark:hover:bg-white/5 hover:bg-slate-100 dark:hover:text-white dark:border-white/10 border-slate-200">Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRemoveAvatar} className="bg-red-600 text-white hover:bg-red-700 border-none">Remove</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>
       </section>
 
       {/* Section 2: Personal Info */}
-      <section className="bg-slate-900/50 border border-white/5 rounded-2xl p-8 space-y-8">
+      <section className="dark:bg-slate-900/50 bg-white border dark:border-white/5 border-slate-200 rounded-2xl p-8 space-y-8">
         <div>
-          <h3 className="text-lg font-semibold text-white mb-1">Personal Information</h3>
-          <p className="text-sm text-slate-500">These details are public to all SetChat users.</p>
+          <h3 className="text-lg font-semibold dark:text-white text-slate-900 mb-1">Personal Information</h3>
+          <p className="text-sm text-slate-500">These details are public to all Meld users.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -184,7 +282,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
               defaultValue={form.getValues("gender")}
               onValueChange={(val) => form.setValue("gender", val as any)}
             >
-              <SelectTrigger className="bg-slate-950 border-white/10 text-white h-11 focus-visible:ring-blue-600">
+              <SelectTrigger className="dark:bg-slate-950 bg-white dark:border-white/10 border-slate-200 dark:text-white text-slate-900 h-11 focus-visible:ring-blue-600">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -203,7 +301,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">@</span>
               <Input
                 {...form.register("username")}
-                className="pl-8 bg-slate-950 border-white/10 text-white h-11 focus-visible:ring-blue-600 focus-visible:border-blue-600/50"
+                className="pl-8 dark:bg-slate-950 bg-white dark:border-white/10 border-slate-200 dark:text-white text-slate-900 h-11 focus-visible:ring-blue-600 focus-visible:border-blue-600/50"
               />
             </div>
           </div>
@@ -213,7 +311,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
           <Label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Full Name</Label>
           <Input
             {...form.register("name")}
-            className="bg-slate-950 border-white/10 text-white h-11 focus-visible:ring-blue-600 focus-visible:border-blue-600/50"
+            className="dark:bg-slate-950 bg-white dark:border-white/10 border-slate-200 dark:text-white text-slate-900 h-11 focus-visible:ring-blue-600 focus-visible:border-blue-600/50"
           />
           {form.formState.errors.name && <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
         </div>
@@ -223,7 +321,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
           <Textarea
             {...form.register("bio")}
             placeholder="Product Designer & Tech Enthusiast..."
-            className="bg-slate-950 border-white/10 text-white min-h-[120px] resize-none focus-visible:ring-blue-600 focus-visible:border-blue-600/50 p-4 leading-relaxed"
+            className="dark:bg-slate-950 bg-white dark:border-white/10 border-slate-200 dark:text-white text-slate-900 min-h-[120px] resize-none focus-visible:ring-blue-600 focus-visible:border-blue-600/50 p-4 leading-relaxed"
           />
           <div className="flex justify-end">
             <span className="text-[10px] text-slate-600">{form.watch("bio")?.length || 0}/250 characters</span>
@@ -232,13 +330,13 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
       </section>
 
       {/* Section 3: Languages */}
-      <section className="bg-slate-900/50 border border-white/5 rounded-2xl p-8 space-y-6">
-        <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+      <section className="dark:bg-slate-900/50 bg-white border dark:border-white/5 border-slate-200 rounded-2xl p-8 space-y-6">
+        <div className="flex items-center gap-4 border-b dark:border-white/5 border-slate-100 pb-4">
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-            <span className="text-blue-400 font-bold text-lg">文</span>
+            <span className="text-blue-500 font-bold text-lg">文</span>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Language Preferences</h3>
+            <h3 className="text-lg font-semibold dark:text-white text-slate-900">Language Preferences</h3>
             <p className="text-sm text-slate-500">Customize your translation and display settings.</p>
           </div>
         </div>
@@ -246,7 +344,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Selected Languages</Label>
-            <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">
+            <span className="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full border border-blue-500/20">
               {selectedLanguages.length} selected
             </span>
           </div>
@@ -260,7 +358,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
                   "px-3 py-2.5 rounded-xl text-[11px] font-medium transition-all border flex flex-col items-center justify-center gap-1 text-center",
                   selectedLanguages.includes(lang.id)
                     ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20"
-                    : "bg-slate-950 border-white/10 text-slate-400 hover:border-white/20 hover:text-white"
+                    : "dark:bg-slate-950 bg-white dark:border-white/10 border-slate-200 dark:text-slate-400 text-slate-600 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white"
                 )}
               >
                 <span>{lang.nameEnglish}</span>
@@ -273,16 +371,16 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-slate-950 rounded-xl border border-white/5 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between p-5 dark:bg-slate-950 bg-slate-50 rounded-xl border dark:border-white/5 border-slate-200 gap-4">
           <div className="space-y-1">
-            <Label className="text-sm font-medium text-white">Primary Display Language</Label>
+            <Label className="text-sm font-medium dark:text-white text-slate-900">Primary Display Language</Label>
             <p className="text-xs text-slate-500">This is your main language across the whole app.</p>
           </div>
           <Select
             defaultValue={form.getValues("preferredReadingLocale")}
             onValueChange={(val) => form.setValue("preferredReadingLocale", val)}
           >
-            <SelectTrigger className="w-full md:w-[200px] bg-slate-900 border-white/10 text-white h-10">
+            <SelectTrigger className="w-full md:w-[200px] dark:bg-slate-900 bg-white dark:border-white/10 border-slate-200 dark:text-white text-slate-900 h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -303,9 +401,9 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
           </Select>
         </div>
 
-        <div className="flex items-center justify-between p-5 bg-slate-950 rounded-xl border border-white/5">
+        <div className="flex items-center justify-between p-5 dark:bg-slate-950 bg-slate-50 rounded-xl border dark:border-white/5 border-slate-200">
           <div className="space-y-1">
-            <Label className="text-sm font-medium text-white">Auto-translate messages</Label>
+            <Label className="text-sm font-medium dark:text-white text-slate-900">Auto-translate messages</Label>
             <p className="text-xs text-slate-500">Automatically translate messages that aren't in your primary language.</p>
           </div>
           <Switch

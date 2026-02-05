@@ -120,9 +120,9 @@ export default async function OnboardingLanguagesPage() {
 
     return (
         <div className="space-y-6">
-            <div className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-white">Select Languages</h1>
-                <p className="text-slate-400">Choose languages you are interested in.</p>
+            <div className="space-y-2 text-center pb-2">
+                <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Select Languages</h1>
+                <p className="text-muted-foreground text-sm max-w-[300px] mx-auto">Choose languages you are interested in communicating with.</p>
             </div>
 
             <LanguagesForm languages={sortedLanguages} />
