@@ -142,10 +142,18 @@ export function Sidebar({ user }: { user: any }) {
                     "flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors relative group",
                     isCollapsed ? "justify-center px-2" : "px-3",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      ? "text-primary-foreground"
                       : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                   )}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-item"
+                      className="absolute inset-0 bg-primary rounded-lg shadow-lg shadow-primary/20 z-0"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-3 w-full">
                   <item.icon className={cn("h-4 w-4 shrink-0 transition-all", isCollapsed ? "h-5 w-5" : "")} />
 
                   <AnimatePresence>
@@ -161,6 +169,7 @@ export function Sidebar({ user }: { user: any }) {
                       </motion.span>
                     )}
                   </AnimatePresence>
+                  </span>
 
                   {item.badge && (
                     <span className={cn(
@@ -253,7 +262,7 @@ export function Sidebar({ user }: { user: any }) {
               isCollapsed ? "justify-center p-2 h-10 w-10 mx-auto" : "gap-3 p-3"
             )}>
               <Avatar className={cn("border border-border shrink-0", isCollapsed ? "h-8 w-8" : "h-9 w-9")}>
-                <AvatarImage src={user?.avatarUrl} />
+                <AvatarImage src={user?.avatarUrl} referrerPolicy="no-referrer" />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {user?.name?.substring(0, 2).toUpperCase() || "ME"}
                 </AvatarFallback>

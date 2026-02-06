@@ -25,8 +25,8 @@ export default async function NotesLayout({
 
       {/* Pane 2: Editor Area (Dynamic Children) */}
       <main className="flex-1 min-w-0 dark:bg-slate-900 bg-white dark:border-l-white/5 border-l-black/5 flex flex-col">
-        <div className="p-4 md:p-6 pb-0">
-          <NavigationBreadcrumb pageName="Notes" className="" />
+        <div className="p-2 pb-0">
+          <NavigationBreadcrumb pageName="Notes" className="mb-2" />
         </div>
         <div className="flex-1 min-h-0">
           {children}

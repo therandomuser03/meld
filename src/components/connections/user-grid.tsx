@@ -69,7 +69,7 @@ export function UserGrid({ currentUserId, initialSuggestions, initialPending, in
     const renderGrid = (users: User[], emptyMessage: string) => {
         if (users.length === 0) {
             return (
-                <div className="text-center py-20 dark:bg-slate-900/20 bg-slate-50 rounded-3xl border border-dashed dark:border-white/5 border-slate-200">
+                <div className="text-center py-20 dark:bg-slate-900/20 bg-slate-50/50 backdrop-blur-xl rounded-3xl border border-dashed dark:border-white/5 border-slate-200">
                     <p className="text-slate-500 text-sm">{emptyMessage}</p>
                 </div>
             );
@@ -148,7 +148,7 @@ export function UserGrid({ currentUserId, initialSuggestions, initialPending, in
             <TabsContent value="received" className="mt-0">
                 <h2 className="text-xl font-bold dark:text-white text-slate-900 tracking-tight mb-6">Received Requests</h2>
                 {initialReceived.length === 0 ? (
-                    <div className="text-center py-20 dark:bg-slate-900/20 bg-slate-50 rounded-3xl border border-dashed dark:border-white/5 border-slate-200">
+                    <div className="text-center py-20 dark:bg-slate-900/20 bg-slate-50/50 backdrop-blur-xl rounded-3xl border border-dashed dark:border-white/5 border-slate-200">
                         <p className="text-slate-500 text-sm">No new requests received.</p>
                     </div>
                 ) : (

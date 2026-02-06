@@ -13,11 +13,11 @@ export default async function TasksPage() {
   // Fetch tasks
   // Note: We are mocking 'priority' extraction since it's not in your schema yet.
   // Ideally, you should add `priority String?` to your Prisma schema.
-  const rawTasks = await prisma.task.findMany({
+  // 1. Tasks created by "current user" (My Tasks)
+  const myTasksRaw = await prisma.task.findMany({
     where: {
-      authorId: user.id,
-      // Optional: Filter out old completed tasks to keep board clean?
-      // status: { not: 'DONE' } // or show all
+      authorId: user.id
+      // status: { not: 'DONE' } // Optional filter
     },
     orderBy: { createdAt: 'desc' },
     include: {
@@ -25,21 +25,41 @@ export default async function TasksPage() {
     }
   });
 
-  // Transform for UI (Handle priority if stored in description or separate field)
-  const tasks = rawTasks.map((t) => ({
+  // 2. Tasks shared with "current user" (Shared Tasks)
+  // where assignee.userId = user.id AND authorId != user.id
+  const sharedTasksRaw = await prisma.task.findMany({
+    where: {
+      assignees: {
+        some: { userId: user.id }
+      },
+      NOT: {
+        authorId: user.id
+      }
+    },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      assignees: { include: { user: true } },
+      author: { select: { name: true, avatarUrl: true } } // Show who shared it
+    }
+  });
+
+  const transformTask = (t: any) => ({
     ...t,
     startDate: t.startDate?.toISOString() || null,
     endDate: t.endDate?.toISOString() || null,
     dueDate: t.endDate?.toISOString() || null,
     isAllDay: t.isAllDay,
     priority: (t.priority as "HIGH" | "MEDIUM" | "LOW") || "MEDIUM"
-  }));
+  });
+
+  const myTasks = myTasksRaw.map(transformTask);
+  const sharedTasks = sharedTasksRaw.map(transformTask);
 
   return (
-    <div className="h-[calc(100vh-6rem)] flex flex-col space-y-4">
+    <div className="h-full flex flex-col space-y-4 p-6">
       <NavigationBreadcrumb pageName="Tasks" />
       <div className="flex-1 min-h-0">
-        <TaskBoard tasks={tasks} />
+        <TaskBoard myTasks={myTasks} sharedTasks={sharedTasks} currentUser={user} />
       </div>
     </div>
   );

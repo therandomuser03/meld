@@ -45,7 +45,7 @@ export function InvitationCard({ request }: InvitationCardProps) {
     };
 
     return (
-        <div className="dark:bg-slate-900/50 bg-white/50 border dark:border-white/10 border-black/5 p-4 rounded-xl flex items-center gap-4 min-w-[320px] shadow-sm">
+        <div className="dark:bg-slate-900/50 bg-white/50 backdrop-blur-xl border dark:border-white/10 border-black/5 p-4 rounded-xl flex items-center gap-4 min-w-[320px] shadow-sm">
             <Avatar className="h-12 w-12 border dark:border-white/10 border-black/5">
                 <AvatarImage src={request.fromUser.avatarUrl || ""} />
                 <AvatarFallback className="dark:bg-slate-800 bg-slate-200 dark:text-slate-300 text-slate-600">

@@ -119,10 +119,25 @@ export default async function OnboardingLanguagesPage() {
     });
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pt-10 max-w-5xl mx-auto">
             <div className="space-y-2 text-center pb-2">
-                <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Select Languages</h1>
-                <p className="text-muted-foreground text-sm max-w-[300px] mx-auto">Choose languages you are interested in communicating with.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Select Languages</h1>
+                <p className="text-muted-foreground text-sm mx-auto">Choose languages you are interested in communicating with.</p>
+                
+                <div className="mt-6 flex flex-wrap justify-center gap-4 max-w-2xl mx-auto">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
+                        <span className="text-lg">💬</span> Chat Translation
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-medium text-blue-500">
+                        <span className="text-lg">📝</span> Notes Collaboration
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-500">
+                        <span className="text-lg">✅</span> Task Management
+                    </div>
+                    <p className="text-xs text-muted-foreground/80 w-full mt-2">
+                        You'll be able to see content from friends in your selected languages automatically.
+                    </p>
+                </div>
             </div>
 
             <LanguagesForm languages={sortedLanguages} />

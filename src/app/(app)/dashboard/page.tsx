@@ -10,6 +10,7 @@ import prisma from "@/lib/prisma/client";
 import { getUnreadCount } from "@/actions/chat";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { NavigationBreadcrumb } from "@/components/common/navigation-breadcrumb";
+import { StaggerList, StaggerItem } from "@/components/ui/motion-wrappers";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -70,15 +71,19 @@ export default async function DashboardPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent" />
       </div>
 
-      <div className="space-y-6">
+      <StaggerList className="space-y-6">
         {/* Navigation Breadcrumb */}
-        <NavigationBreadcrumb pageName="Dashboard" />
+        <StaggerItem>
+          <NavigationBreadcrumb pageName="Dashboard" />
+        </StaggerItem>
 
         {/* Header - Preserved Greeting */}
-        <DashboardHeader firstName={firstName} date={today} />
+        <StaggerItem>
+          <DashboardHeader firstName={firstName} date={today} />
+        </StaggerItem>
 
         {/* Row 1: Metrics (3 Grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StaggerItem className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
             labelId="dashboard.stats.unread"
             count={unreadCount}
@@ -98,14 +103,14 @@ export default async function DashboardPage() {
             count={pendingNotesCount}
             icon={<Pin className="h-5 w-5" />}
           />
-        </div>
+        </StaggerItem>
 
         {/* Row 2: Content Cards (2 Grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
+        <StaggerItem className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
           <PinnedNotesCard notes={pinnedNotes} />
           <PendingTasksList tasks={pendingTasks} />
-        </div>
-      </div>
+        </StaggerItem>
+      </StaggerList>
     </div>
   );
 }

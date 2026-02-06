@@ -49,7 +49,7 @@ export function MessageBubble({
             "px-4 py-3 rounded-2xl text-sm relative transition-all shadow-sm",
             isOwn
               ? "bg-primary text-white rounded-br-none"
-              : "bg-secondary text-foreground rounded-bl-none border border-border/30 backdrop-blur-sm"
+              : "bg-secondary dark:bg-[#dddbff]/90 text-foreground dark:text-black rounded-bl-none border border-border/30 backdrop-blur-sm"
           )}
         >
           <p className="leading-relaxed whitespace-pre-wrap break-words">{displayContent}</p>

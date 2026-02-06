@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageBubble } from "@/components/chat/message-bubble";
+import { ChatDoodles } from "@/components/chat/chat-doodles";
 import { cn } from "@/lib/utils";
 
 import EmojiPicker, { Theme } from "emoji-picker-react";
@@ -253,14 +254,15 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
 
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden relative">
-        <ScrollArea ref={scrollRef} className="h-full p-4 md:p-6">
+        <ChatDoodles className="absolute inset-0 z-0 opacity-40 pointer-events-none" />
+        <ScrollArea ref={scrollRef} className="h-full p-4 md:p-6 relative z-10">
           <div className="flex justify-center mb-8">
             <span className="px-5 py-1.5 rounded-full bg-muted/30 border border-border/50 text-[11px] font-semibold text-muted-foreground shadow-sm">
               Today
             </span>
           </div>
 
-          <div className="space-y-6 max-w-4xl mx-auto pb-6">
+          <div className="space-y-6 w-full pb-6 px-4">
             {messages.map((msg) => (
               <MessageBubble
                 key={msg.id}
@@ -289,7 +291,7 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
 
       {/* Composer */}
       <div className="p-6 bg-background/50 border-t border-border/50">
-        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-2">
           {otherUserTyping && (
             <p className="text-[10px] text-muted-foreground/60 ml-4 animate-pulse">
               {otherUser.name} is typing...
@@ -297,13 +299,6 @@ export function ChatWindow({ threadId, initialMessages = [], currentUserId, othe
           )}
           <div className="flex items-center gap-3">
             <div className="flex-1 bg-muted/30 border border-border/50 rounded-2xl flex items-center p-2 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-inner">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground rounded-xl h-10 w-10 shrink-0"
-              >
-                <Paperclip className="h-5 w-5" />
-              </Button>
 
               <Input
                 value={inputText}

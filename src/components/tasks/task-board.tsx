@@ -1,73 +1,84 @@
 "use client";
 
 import * as React from "react";
-import { MoreHorizontal, Calendar, CheckCircle2, Trash2, ArrowRight, Loader2, Plus, Clock } from "lucide-react";
+import { MoreHorizontal, Calendar, CheckCircle2, List, Trash2, ArrowRight, Loader2, Plus, Clock, Share2, Languages, User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { CreateTaskDialog } from "./create-task-dialog";
+import { ShareTaskDialog } from "./share-task-dialog";
+import { TranslateTaskDialog } from "./translate-task-dialog";
 
 // Types
-type Task = {
+export type Task = {
   id: string;
   title: string;
+  description?: string | null;
   status: "TODO" | "IN_PROGRESS" | "DONE" | "CANCELED";
   priority?: "HIGH" | "MEDIUM" | "LOW"; // logical field
   startDate?: string | null;
   endDate?: string | null;
   isAllDay: boolean;
-  assignees?: { user: { avatarUrl: string | null } }[];
+  authorId: string;
+  assignees?: { user: { id: string; avatarUrl: string | null; name: string | null } }[];
+  author?: { name: string | null; avatarUrl: string | null };
 };
 
 interface TaskBoardProps {
-  tasks: Task[];
+  myTasks: Task[];
+  sharedTasks: Task[];
+  currentUser: any;
 }
 
-export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
-  const [tasks, setTasks] = React.useState(initialTasks);
+export function TaskBoard({ myTasks: initialMyTasks, sharedTasks: initialSharedTasks, currentUser }: TaskBoardProps) {
+  const [myTasks, setMyTasks] = React.useState(initialMyTasks);
+  const [sharedTasks, setSharedTasks] = React.useState(initialSharedTasks);
   const router = useRouter();
-  const supabase = createClient();
 
-  // Sync state when props change (e.g., after router.refresh())
+  // Sync state
   React.useEffect(() => {
-    setTasks(initialTasks);
-  }, [initialTasks]);
+    setMyTasks(initialMyTasks);
+    setSharedTasks(initialSharedTasks);
+  }, [initialMyTasks, initialSharedTasks]);
 
   // Optimistic Updates
-  const updateStatus = async (taskId: string, newStatus: string) => {
-    const previousTasks = [...tasks];
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus as any } : t));
+  const updateStatus = async (taskId: string, newStatus: string, isShared: boolean) => {
+    const targetSet = isShared ? setSharedTasks : setMyTasks;
+    const currentTasks = isShared ? sharedTasks : myTasks;
+    
+    // Optimistic update
+    targetSet(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus as any } : t));
 
     try {
-      // Assuming you have a server action or API route for this
-      // await updateTaskStatus(taskId, newStatus);
-      // For demo, using direct supabase call if RLS allows, or fetch API
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: newStatus })
       });
       if (!response.ok) throw new Error();
-
       router.refresh();
     } catch (err) {
-      setTasks(previousTasks);
+      // Revert
+      targetSet(currentTasks);
       toast.error("Failed to update task");
     }
   };
 
   const deleteTask = async (taskId: string) => {
-    const previousTasks = [...tasks];
-    setTasks(prev => prev.filter(t => t.id !== taskId));
+    const previousTasks = [...myTasks];
+    setMyTasks(prev => prev.filter(t => t.id !== taskId));
 
     try {
       const response = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
@@ -75,7 +86,7 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       toast.success("Task deleted forever");
       router.refresh();
     } catch (err) {
-      setTasks(previousTasks);
+      setMyTasks(previousTasks);
       toast.error("Failed to delete task");
     }
   };
@@ -86,22 +97,8 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
     { id: "DONE", label: "Completed", color: "bg-emerald-500" },
   ];
 
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50">
-            <a href="/tasks/history" className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              View History
-            </a>
-          </Button>
-          <CreateTaskDialog />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full overflow-hidden">
+  const renderBoard = (tasks: Task[], isShared: boolean) => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full overflow-hidden">
         {columns.map((col) => {
           const colTasks = tasks.filter(t => t.status === col.id);
 
@@ -127,15 +124,17 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
                     <TaskCard
                       key={task.id}
                       task={task}
-                      onStatusChange={updateStatus}
+                      currentUser={currentUser}
+                      isSharedView={isShared}
+                      onStatusChange={(id, s) => updateStatus(id, s, isShared)}
                       onDelete={deleteTask}
                     />
                   ))}
 
-                  {/* Empty State for ToDo */}
-                  {col.id === 'TODO' && (
+                  {/* Empty State for ToDo (only for My Tasks) */}
+                  {!isShared && col.id === 'TODO' && (
                     <CreateTaskDialog trigger={
-                      <button className="w-full py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:bg-secondary/10 transition-all text-sm font-medium flex items-center justify-center gap-2">
+                      <button className="w-full py-3 rounded-xl border border-dashed border-slate-300 dark:border-border text-muted-foreground hover:text-foreground hover:bg-secondary/10 transition-all text-sm font-medium flex items-center justify-center gap-2">
                         <Plus className="h-4 w-4" /> Add Task
                       </button>
                     } />
@@ -145,25 +144,76 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
             </div>
           );
         })}
-      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col h-full">
+      <Tabs defaultValue="my-tasks" className="flex flex-col h-full">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
+            <TabsList className="bg-secondary/50">
+               <TabsTrigger value="my-tasks" className="gap-2">
+                  <List className="h-4 w-4" /> My Tasks
+               </TabsTrigger>
+               <TabsTrigger value="shared-tasks" className="gap-2">
+                  <UserIcon className="h-4 w-4" /> Shared With Me
+               </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <div className="flex gap-2">
+            <Button variant="outline" asChild className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50">
+              <a href="/tasks/history" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                History
+              </a>
+            </Button>
+            <CreateTaskDialog />
+          </div>
+        </div>
+
+        <TabsContent value="my-tasks" className="flex-1 min-h-0 mt-0">
+           {renderBoard(myTasks, false)}
+        </TabsContent>
+        
+        <TabsContent value="shared-tasks" className="flex-1 min-h-0 mt-0">
+            {sharedTasks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[500px] text-muted-foreground border border-dashed border-border rounded-xl">
+                    <Share2 className="h-10 w-10 mb-4 opacity-50" />
+                    <p>No tasks have been shared with you yet.</p>
+                </div>
+            ) : (
+                renderBoard(sharedTasks, true)
+            )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
 
 function TaskCard({
   task,
+  currentUser,
+  isSharedView,
   onStatusChange,
   onDelete
 }: {
   task: Task;
+  currentUser: any;
+  isSharedView: boolean;
   onStatusChange: (id: string, s: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const [shareOpen, setShareOpen] = React.useState(false);
+  const [translateOpen, setTranslateOpen] = React.useState(false);
+
   const priorityColor = {
     HIGH: "text-destructive bg-destructive/10 border-destructive/20",
     MEDIUM: "text-accent bg-accent/10 border-accent/20",
     LOW: "text-primary bg-primary/10 border-primary/20",
-  }[task.priority || "MEDIUM"]; // Default to MEDIUM if undefined
+  }[task.priority || "MEDIUM"]; 
 
   const formatDate = () => {
     if (!task.endDate) return 'No date';
@@ -177,11 +227,13 @@ function TaskCard({
     };
 
     if (!start) return end.toLocaleDateString(undefined, options);
-
     return `${start.toLocaleDateString(undefined, options)} - ${end.toLocaleDateString(undefined, options)}`;
   }
 
+  const isAuthor = task.authorId === currentUser.id;
+
   return (
+    <>
     <div className="group relative bg-muted/20 hover:bg-secondary border border-border/50 hover:border-primary/20 rounded-xl p-4 transition-all shadow-sm">
       <div className="flex justify-between items-start mb-2">
         <Badge variant="outline" className={cn("text-[10px] uppercase font-bold border", priorityColor)}>
@@ -195,6 +247,19 @@ function TaskCard({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
+            <DropdownMenuItem onClick={() => setTranslateOpen(true)}>
+                <Languages className="mr-2 h-4 w-4" /> Translate
+            </DropdownMenuItem>
+            
+            {/* Show Share only if author */}
+            {isAuthor && (
+                <DropdownMenuItem onClick={() => setShareOpen(true)}>
+                    <Share2 className="mr-2 h-4 w-4" /> Share
+                </DropdownMenuItem>
+            )}
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               disabled={task.status === 'TODO'}
               onClick={() => onStatusChange(task.id, 'TODO')}
@@ -213,12 +278,18 @@ function TaskCard({
             >
               Mark as Done
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-400 focus:text-red-300 dark:focus:bg-red-900/20 focus:bg-red-50"
-              onClick={() => onDelete(task.id)}
-            >
-              Delete Forever
-            </DropdownMenuItem>
+            
+            {isAuthor && (
+                <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                className="text-red-400 focus:text-red-300 dark:focus:bg-red-900/20 focus:bg-red-50"
+                onClick={() => onDelete(task.id)}
+                >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </DropdownMenuItem>
+                </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -237,9 +308,32 @@ function TaskCard({
           <span>{formatDate()}</span>
         </div>
 
-        {/* Mock Avatar - In real app use task.assignees */}
-        <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-primary-foreground font-medium border border-background">
-          ME
+        {/* Assignee Avatar */}
+        <div className="flex -space-x-2">
+            {/* If shared view, show Author avatar */}
+            {isSharedView && task.author ? (
+                 <Avatar className="h-6 w-6 border-2 border-background" title={`Shared by ${task.author.name}`}>
+                    <AvatarImage src={task.author.avatarUrl || ""} />
+                    <AvatarFallback className="text-[9px] bg-indigo-500 text-white">
+                        {task.author.name?.substring(0,2)?.toUpperCase()}
+                    </AvatarFallback>
+                 </Avatar>
+            ) : (
+                // My Tasks view: Show assignees
+                (task.assignees && task.assignees.length > 0) ? (
+                task.assignees.map((assignee, i) => (
+                    <Avatar key={i} className="h-6 w-6 border-2 border-background" title={assignee.user.name || "User"}>
+                    <AvatarImage src={assignee.user.avatarUrl || ""} />
+                    <AvatarFallback className="text-[9px] bg-primary text-primary-foreground">
+                        {assignee.user.name?.substring(0,2)?.toUpperCase() || "??"}
+                    </AvatarFallback>
+                    </Avatar>
+                ))
+                ) : (
+                    // Logic: If I created it and no assignees, it's mine.
+                    null
+                )
+            )}
         </div>
       </div>
 
@@ -248,5 +342,9 @@ function TaskCard({
         <div className="absolute bottom-0 left-0 h-0.5 bg-primary w-2/3 rounded-bl-xl" />
       )}
     </div>
+
+    {isAuthor && <ShareTaskDialog open={shareOpen} setOpen={setShareOpen} task={task} />}
+    <TranslateTaskDialog open={translateOpen} setOpen={setTranslateOpen} task={task} />
+    </>
   );
 }

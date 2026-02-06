@@ -124,7 +124,7 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
         content: note.body, // Initial markdown content
         editorProps: {
             attributes: {
-                class: "prose prose-invert max-w-none focus:outline-none min-h-[500px] text-slate-300",
+                class: "prose dark:prose-invert max-w-none focus:outline-none min-h-[500px] text-foreground",
             },
         },
         onUpdate: ({ editor }) => {
@@ -182,7 +182,8 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
     return (
         <div className="flex flex-col h-full">
             {/* Toolbar */}
-            <div className="h-16 border-b border-white/10 flex items-center justify-between px-6 bg-slate-900/50 backdrop-blur-md">
+            {/* Toolbar */}
+            <div className="h-16 border-b border-border flex items-center justify-between px-6 bg-background/50 backdrop-blur-md">
                 {/* Formatting Tools */}
                 <div className="flex items-center gap-1">
                     {!isReadOnly && (
@@ -211,7 +212,7 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                         </>
                     )}
                     {isReadOnly && (
-                        <div className="text-sm text-slate-500 italic flex items-center gap-2">
+                        <div className="text-sm text-muted-foreground italic flex items-center gap-2">
                             <span>Read Only</span>
                         </div>
                     )}
@@ -220,9 +221,9 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                 {/* Actions */}
                 <div className="flex items-center gap-3">
                     {!isReadOnly && (
-                        <div className="flex items-center gap-2 text-[10px] text-slate-500 mr-2 transition-colors duration-300">
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mr-2 transition-colors duration-300">
                             <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${saveStatus === 'saving' ? "bg-yellow-500" :
-                                saveStatus === 'saved' ? "bg-emerald-500" : "bg-slate-500"
+                                saveStatus === 'saved' ? "bg-emerald-500" : "bg-muted-foreground"
                                 }`} />
                             {saveStatus === 'saving' ? "Saving..." :
                                 saveStatus === 'saved' ? "Saved just now" : ""}
@@ -242,10 +243,10 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                                 {targetLang ? targetLang.name : "Translate"}
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-slate-900 border-white/10 text-slate-300 max-h-[300px] overflow-y-auto">
+                        <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground max-h-[300px] overflow-y-auto">
                             {userLanguages.length > 0 && (
                                 <>
-                                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">My Languages</div>
+                                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">My Languages</div>
                                     {userLanguages.map((lang) => (
                                         <DropdownMenuItem
                                             key={lang.code}
@@ -253,13 +254,13 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                                                 setTargetLang(lang);
                                                 handleTranslate(lang.code);
                                             }}
-                                            className="hover:bg-white/10 cursor-pointer focus:bg-white/10 focus:text-white"
+                                            className="cursor-pointer"
                                         >
                                             {lang.name}
                                         </DropdownMenuItem>
                                     ))}
-                                    <div className="h-px bg-white/10 my-1" />
-                                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">All Languages</div>
+                                    <div className="h-px bg-border my-1" />
+                                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">All Languages</div>
                                 </>
                             )}
 
@@ -290,7 +291,7 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                             size="sm"
                             variant="ghost"
                             className={cn(
-                                "text-slate-400 hover:text-yellow-400 gap-2",
+                                "text-muted-foreground hover:text-yellow-400 gap-2",
                                 isPinned && "text-yellow-400 hover:text-yellow-500"
                             )}
                             onClick={handleTogglePin}
@@ -320,7 +321,7 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                         onChange={handleTitleChange}
                         disabled={isReadOnly}
                         className={cn(
-                            "w-full bg-transparent text-4xl font-bold text-white placeholder:text-slate-600 outline-none border-none",
+                            "w-full bg-transparent text-4xl font-bold text-foreground placeholder:text-muted-foreground outline-none border-none",
                             isReadOnly && "opacity-80"
                         )}
                         placeholder="Note Title"
@@ -329,12 +330,12 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                     {/* Tags Input */}
                     <div className="flex flex-wrap gap-2 items-center">
                         {tags.map(tag => (
-                            <span key={tag} className="flex items-center gap-1 bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded-md">
+                            <span key={tag} className="flex items-center gap-1 bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-md">
                                 #{tag}
                                 {!isReadOnly && (
                                     <button
                                         onClick={() => handleRemoveTag(tag)}
-                                        className="hover:text-white"
+                                        className="hover:text-foreground"
                                     >
                                         &times;
                                     </button>
@@ -343,7 +344,7 @@ export function Editor({ note, userLanguages, availableLanguages, currentUserId 
                         ))}
                         {!isReadOnly && (
                             <input
-                                className="bg-transparent text-sm text-slate-400 placeholder:text-slate-600 outline-none min-w-[100px]"
+                                className="bg-transparent text-sm text-muted-foreground placeholder:text-muted-foreground outline-none min-w-[100px]"
                                 placeholder="Add tag + Enter..."
                                 onKeyDown={handleAddTag}
                             />
@@ -362,7 +363,7 @@ function ToolbarBtn({ onClick, active, icon: Icon }: { onClick: () => void, acti
     return (
         <button
             onClick={onClick}
-            className={`p-2 rounded-lg transition-colors ${active ? "bg-white/10 text-white" : "text-slate-400 hover:text-white hover:bg-white/5"}`}
+            className={`p-2 rounded-lg transition-colors ${active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`}
         >
             <Icon className="h-4 w-4" />
         </button>

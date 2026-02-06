@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -26,7 +27,8 @@ export function Hero() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <span className="inline-flex items-center rounded-full border border-primary/20 bg-green-400 px-3 py-1 text-sm font-medium text-green-800">
+          <span className="inline-flex items-center gap-2 rounded-full border border-green-600 bg-black/90 px-3 py-1 text-sm font-medium text-green-400 backdrop-blur-sm">
+            <Image src="/lingodotdev.ico" alt="Lingo.dev" width={20} height={20} className="h-5 w-5 object-contain" />
             Powered by Lingo.dev
           </span>
         </motion.div>
@@ -59,7 +61,7 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
         >
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/80 text-background rounded-full px-8 h-12 text-base font-medium min-w-[160px]">
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/80 text-white rounded-full px-8 h-12 text-base font-medium min-w-[160px]">
             <Link href="/signup">
               Start Building
             </Link>
@@ -78,8 +80,25 @@ export function Hero() {
         className="container px-4 md:px-6 mt-24 relative z-10"
       >
         <div className="rounded-xl border border-border bg-secondary/50 backdrop-blur-sm p-2 shadow-2xl">
-          <div className="rounded-lg bg-background aspect-[16/9] w-full flex items-center justify-center text-muted-foreground border border-border/50">
-            Dashboard Preview
+          <div className="rounded-lg bg-background aspect-[16/9] w-full relative overflow-hidden text-muted-foreground border border-border/50">
+            <Image 
+              src="/dashboard-light.png" 
+              alt="Dashboard Preview - Light Mode" 
+              className="object-cover object-top opacity-100 dark:opacity-0 transition-opacity duration-500"
+              fill
+              priority
+              quality={100}
+              sizes="100vw"
+            />
+            <Image 
+              src="/dashboard-dark.png" 
+              alt="Dashboard Preview - Dark Mode" 
+              className="object-cover object-top opacity-0 dark:opacity-100 transition-opacity duration-500"
+              fill
+              priority
+              quality={100}
+              sizes="100vw"
+            />
           </div>
         </div>
       </motion.div>

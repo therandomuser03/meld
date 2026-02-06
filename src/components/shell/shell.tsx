@@ -13,7 +13,7 @@ interface ShellProps {
 export function Shell({ children, userProfile }: ShellProps) {
     const { isCollapsed } = useSidebar();
     const pathname = usePathname();
-    const isFullWidthPage = pathname?.startsWith("/chat") || pathname?.startsWith("/notes");
+    const isFullWidthPage = pathname?.startsWith("/chat") || pathname?.startsWith("/notes") || pathname?.startsWith("/tasks");
 
     return (
         <>

@@ -73,9 +73,13 @@ export function DotPattern({
   glow = false,
   ...props
 }: DotPatternProps) {
-  const id = useId()
+  const [id, setId] = useState("")
   const containerRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    setId(`pattern-${Math.random().toString(36).slice(2)}`)
+  }, [])
 
   useEffect(() => {
     const updateDimensions = () => {

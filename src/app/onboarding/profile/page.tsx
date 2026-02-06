@@ -74,9 +74,9 @@ export default function OnboardingProfilePage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-[500px] mx-auto">
             <div className="space-y-2 text-center pb-4">
-                <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome to Meld</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Welcome to Meld</h1>
                 <p className="text-muted-foreground text-sm">Let's set up your profile to get you started.</p>
             </div>
 
@@ -88,11 +88,11 @@ export default function OnboardingProfilePage() {
                         <Input
                             id="username"
                             placeholder="johndoe"
-                            className="bg-secondary/20 border-white/5 h-12 text-white placeholder:text-muted-foreground pl-9 focus:ring-primary/50 focus:border-primary/50 transition-all rounded-xl"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground pl-9 focus:ring-primary/50 focus:border-primary/50 transition-all rounded-xl shadow-sm h-12"
                             {...register("username")}
                         />
                     </div>
-                    {errors.username && <p className="text-xs text-red-400 mt-1">{errors.username.message}</p>}
+                    {errors.username && <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>}
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold opacity-70">Username must be unique</p>
                 </div>
 
@@ -101,10 +101,10 @@ export default function OnboardingProfilePage() {
                     <Input
                         id="profession"
                         placeholder="e.g. Software Engineer"
-                        className="bg-secondary/20 border-white/5 h-12 text-white placeholder:text-muted-foreground focus:ring-primary/50 focus:border-primary/50 transition-all rounded-xl"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-primary/50 focus:border-primary/50 transition-all rounded-xl shadow-sm h-12"
                         {...register("profession")}
                     />
-                    {errors.profession && <p className="text-xs text-red-400 mt-1">{errors.profession.message}</p>}
+                    {errors.profession && <p className="text-xs text-red-500 mt-1">{errors.profession.message}</p>}
                 </div>
 
                 <div className="grid gap-2">
@@ -116,7 +116,7 @@ export default function OnboardingProfilePage() {
                                 role="combobox"
                                 aria-expanded={open}
                                 className={cn(
-                                    "w-full justify-between bg-secondary/20 border-white/5 h-12 text-white hover:bg-secondary/30 hover:text-white rounded-xl px-3 font-normal",
+                                    "w-full justify-between bg-background border-input text-foreground hover:bg-muted hover:text-foreground rounded-xl px-3 font-normal h-12 shadow-sm",
                                     !countryValue && "text-muted-foreground"
                                 )}
                             >
@@ -126,9 +126,9 @@ export default function OnboardingProfilePage() {
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-white/10 bg-[#0a0a0f] text-white">
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-input bg-popover text-popover-foreground">
                             <Command className="bg-transparent">
-                                <CommandInput placeholder="Search country..." className="text-white placeholder:text-muted-foreground border-b border-white/5" />
+                                <CommandInput placeholder="Search country..." className="border-b border-input" />
                                 <CommandList>
                                     <CommandEmpty>No country found.</CommandEmpty>
                                     <CommandGroup>
@@ -140,7 +140,7 @@ export default function OnboardingProfilePage() {
                                                     setValue("country", country.value, { shouldValidate: true });
                                                     setOpen(false);
                                                 }}
-                                                className="aria-selected:bg-primary/10 aria-selected:text-white"
+                                                className="aria-selected:bg-accent aria-selected:text-accent-foreground"
                                             >
                                                 <Check
                                                     className={cn(
@@ -156,24 +156,24 @@ export default function OnboardingProfilePage() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    {errors.country && <p className="text-xs text-red-400 mt-1">{errors.country.message}</p>}
+                    {errors.country && <p className="text-xs text-red-500 mt-1">{errors.country.message}</p>}
                 </div>
 
                 <div className="grid gap-2">
                     <Label className="text-foreground font-medium">Gender</Label>
                     <Select onValueChange={(val) => setValue("gender", val as any)} defaultValue={watch("gender")}>
-                        <SelectTrigger className="bg-secondary/20 border-white/5 h-12 text-white rounded-xl focus:ring-primary/50 focus:border-primary/50">
+                        <SelectTrigger className="bg-background border-input text-foreground rounded-xl focus:ring-primary/50 focus:border-primary/50 shadow-sm h-12">
                             <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0a0a0f] border-white/10 text-white">
-                            <SelectItem value="MALE" className="focus:bg-primary/10 focus:text-white">Male</SelectItem>
-                            <SelectItem value="FEMALE" className="focus:bg-primary/10 focus:text-white">Female</SelectItem>
-                            <SelectItem value="NON_BINARY" className="focus:bg-primary/10 focus:text-white">Non-binary</SelectItem>
-                            <SelectItem value="PREFER_NOT_TO_SAY" className="focus:bg-primary/10 focus:text-white">Prefer not to say</SelectItem>
-                            <SelectItem value="OTHER" className="focus:bg-primary/10 focus:text-white">Other</SelectItem>
+                        <SelectContent className="bg-popover border-input text-popover-foreground">
+                            <SelectItem value="MALE">Male</SelectItem>
+                            <SelectItem value="FEMALE">Female</SelectItem>
+                            <SelectItem value="NON_BINARY">Non-binary</SelectItem>
+                            <SelectItem value="PREFER_NOT_TO_SAY">Prefer not to say</SelectItem>
+                            <SelectItem value="OTHER">Other</SelectItem>
                         </SelectContent>
                     </Select>
-                    {errors.gender && <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>}
+                    {errors.gender && <p className="text-xs text-red-500 mt-1">{errors.gender.message}</p>}
                 </div>
 
                 <div className="grid gap-2">
@@ -181,12 +181,12 @@ export default function OnboardingProfilePage() {
                     <Textarea
                         id="bio"
                         placeholder="Building things with code and coffee."
-                        className="bg-secondary/20 border-white/5 text-white placeholder:text-muted-foreground resize-none min-h-[100px] focus:ring-primary/50 focus:border-primary/50 transition-all rounded-xl p-3"
+                        className="bg-background border-input text-foreground placeholder:text-muted-foreground resize-none min-h-[100px] focus:ring-primary/50 focus:border-primary/50 transition-all rounded-xl p-3 shadow-sm"
                         {...register("bio")}
                     />
                 </div>
 
-                <Button disabled={isLoading} className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl mt-4">
+                <Button disabled={isLoading} className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl mt-4">
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Continue
                 </Button>

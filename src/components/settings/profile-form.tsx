@@ -217,7 +217,7 @@ export function ProfileForm({ user, selectedLanguageIds, availableLanguages }: P
             <div>
               <h3 className="text-lg font-semibold dark:text-white text-slate-900 mb-1">Profile Picture</h3>
               <p className="text-sm text-slate-500 max-w-sm leading-relaxed">
-                We recommend an image of at least 400x400px. GIFs are supported for Pro users.
+                We recommend an image of at least 400x400px.
               </p>
             </div>
             {/* Hidden file input */}

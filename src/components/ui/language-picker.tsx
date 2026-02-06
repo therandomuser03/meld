@@ -34,7 +34,7 @@ export function LanguagePicker({
 
     return (
         <ScrollArea className={cn("h-full w-full pr-4", className)}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pb-4">
                 {languages.map((language) => {
                     const isSelected = selectedIds.includes(language.id);
                     return (
@@ -45,15 +45,15 @@ export function LanguagePicker({
                                 "group relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200",
                                 isSelected
                                     ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.15)]"
-                                    : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10"
+                                    : "bg-background/50 border-input hover:bg-muted hover:border-muted-foreground/20"
                             )}
                         >
                             <div
                                 className={cn(
                                     "h-5 w-5 rounded-full border flex items-center justify-center transition-colors duration-200",
                                     isSelected
-                                        ? "bg-primary border-primary text-white"
-                                        : "border-slate-500 group-hover:border-slate-400"
+                                        ? "bg-primary border-primary text-primary-foreground"
+                                        : "border-muted-foreground group-hover:border-foreground"
                                 )}
                             >
                                 {isSelected && <Check className="h-3 w-3" />}
@@ -62,13 +62,13 @@ export function LanguagePicker({
                                 <span
                                     className={cn(
                                         "text-sm font-medium transition-colors",
-                                        isSelected ? "text-primary shadow-sm" : "text-slate-200"
+                                        isSelected ? "text-primary shadow-sm" : "text-muted-foreground group-hover:text-foreground"
                                     )}
                                 >
                                     {language.nameEnglish}
                                 </span>
                                 {language.nativeName && (
-                                    <span className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                                    <span className="text-xs text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">
                                         {language.nativeName}
                                     </span>
                                 )}

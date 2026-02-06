@@ -76,7 +76,7 @@ export function LanguagesForm({ languages }: Props) {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="border border-white/5 rounded-xl p-4 bg-white/5 backdrop-blur-sm shadow-inner min-h-[400px]">
+            <div className="border border-border rounded-xl p-4 bg-card/30 backdrop-blur-sm shadow-inner min-h-[400px]">
                 <LanguagePicker
                     languages={languages}
                     selectedIds={selected}
@@ -86,7 +86,7 @@ export function LanguagesForm({ languages }: Props) {
             </div>
             {errors.languages && <p className="text-xs text-red-400 text-center font-medium bg-red-400/10 py-2 rounded-lg border border-red-400/20">{errors.languages.message}</p>}
 
-            <Button disabled={isLoading || selected.length === 0} className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl">
+            <Button disabled={isLoading || selected.length === 0} className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Finish Setup
             </Button>

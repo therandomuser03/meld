@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DotPattern } from "@/components/ui/dot-pattern";
 
+import prisma from "@/lib/prisma/client";
+
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({
@@ -20,16 +22,15 @@ export default async function AppLayout({
   }
 
   // Fetch basic profile info for sidebar
-  const { data: dbProfile } = await supabase
-    .from("UserProfile")
-    .select("name, avatarUrl")
-    .eq("id", user.id)
-    .single();
+  const dbProfile = await prisma.userProfile.findUnique({
+    where: { id: user.id },
+    select: { name: true, avatarUrl: true }
+  });
 
   const profile = {
     name: dbProfile?.name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
     email: user.email,
-    avatarUrl: dbProfile?.avatarUrl || user.user_metadata?.avatar_url || user.user_metadata?.picture,
+    avatarUrl: dbProfile?.avatarUrl || user.user_metadata?.avatar_url || user.user_metadata?.picture || user.user_metadata?.avatar || null,
   };
 
   return (

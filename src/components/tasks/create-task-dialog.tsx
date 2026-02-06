@@ -33,6 +33,18 @@ export function CreateTaskDialog({ trigger }: { trigger?: React.ReactNode }) {
     const priority = formData.get("priority");
     const startDateRaw = formData.get("startDate") as string;
     const endDateRaw = formData.get("endDate") as string;
+    const eventDateRaw = formData.get("eventDate") as string;
+
+    let finalStart = null;
+    let finalEnd = null;
+
+    if (isAllDay && eventDateRaw) {
+      finalStart = new Date(`${eventDateRaw}T00:00:00`).toISOString();
+      finalEnd = new Date(`${eventDateRaw}T23:59:59.999`).toISOString();
+    } else if (!isAllDay) {
+      finalStart = startDateRaw ? new Date(startDateRaw).toISOString() : null;
+      finalEnd = endDateRaw ? new Date(endDateRaw).toISOString() : null;
+    }
 
     try {
       const res = await fetch("/api/tasks", {
@@ -41,8 +53,8 @@ export function CreateTaskDialog({ trigger }: { trigger?: React.ReactNode }) {
           title,
           priority,
           isAllDay,
-          startDate: startDateRaw ? new Date(startDateRaw).toISOString() : null,
-          endDate: endDateRaw ? new Date(endDateRaw).toISOString() : null
+          startDate: finalStart,
+          endDate: finalEnd
         })
       });
 
@@ -102,7 +114,7 @@ export function CreateTaskDialog({ trigger }: { trigger?: React.ReactNode }) {
               id="all-day"
               checked={isAllDay}
               onCheckedChange={(c) => setIsAllDay(!!c)}
-              className="border-border data-[state=checked]:bg-primary text-primary-foreground"
+              className="bg-white border-white data-[state=checked]:bg-primary data-[state=checked]:border-primary text-primary-foreground"
             />
             <label
               htmlFor="all-day"
@@ -112,25 +124,39 @@ export function CreateTaskDialog({ trigger }: { trigger?: React.ReactNode }) {
             </label>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {isAllDay ? (
             <div className="space-y-2">
-              <Label>Start</Label>
+              <Label>Date</Label>
               <Input
-                name="startDate"
-                type={isAllDay ? "date" : "datetime-local"}
+                name="eventDate"
+                type="date"
+                required
                 className="bg-background border-border text-foreground block w-full"
               />
             </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start</Label>
+                <Input
+                  name="startDate"
+                  type="datetime-local"
+                  required
+                  className="bg-background border-border text-foreground block w-full"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label>End</Label>
-              <Input
-                name="endDate"
-                type={isAllDay ? "date" : "datetime-local"}
-                className="bg-background border-border text-foreground block w-full"
-              />
+              <div className="space-y-2">
+                <Label>End</Label>
+                <Input
+                  name="endDate"
+                  type="datetime-local"
+                  required
+                  className="bg-background border-border text-foreground block w-full"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <DialogFooter className="pt-4">
             <Button disabled={isLoading} type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full">

@@ -60,7 +60,7 @@ export function PersonCard({ user, status = "NONE", currentUserId }: PersonCardP
     };
 
     return (
-        <div className="group dark:bg-slate-900/50 bg-white border dark:border-white/10 border-slate-200 hover:border-blue-500/30 p-6 rounded-2xl flex flex-col items-center text-center transition-all shadow-sm hover:shadow-md">
+        <div className="group dark:bg-slate-900/50 bg-white/80 backdrop-blur-xl border dark:border-white/10 border-slate-200 hover:border-blue-500/30 p-6 rounded-2xl flex flex-col items-center text-center transition-all shadow-sm hover:shadow-md">
             <div className="relative mb-4">
                 <Avatar className="h-20 w-20 border-2 dark:border-slate-800 border-white shadow-xl">
                     <AvatarImage src={user.avatarUrl || ""} />

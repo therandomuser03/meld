@@ -36,7 +36,7 @@
   "common.delete": "Delete",
   "common.edit": "Edit",
   "common.theme": "Change Theme",
-  "common.language": "Language",
+  "common.language": "Global Languages",
   "common.logout": "Log out",
   "chat.send": "Send",
   "chat.placeholder": "Type a message..."

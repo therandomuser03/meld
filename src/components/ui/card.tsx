@@ -1,11 +1,20 @@
+"use client";
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+import { motion } from "motion/react"
+
+function Card({ className, ...props }: React.ComponentProps<typeof motion.div>) {
   return (
-    <div
+    <motion.div
       data-slot="card"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className={cn(
         "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
         className
