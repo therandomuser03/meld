@@ -110,31 +110,31 @@ export function SignupForm() {
           {/* Name & Profession Row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name" className="text-slate-200 text-xs uppercase font-medium tracking-wide">Full Name</Label>
+              <Label htmlFor="name" className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Full Name</Label>
               <Input
                 id="name"
                 placeholder="John Doe"
-                className="bg-slate-950/50 border-white/5 text-white placeholder:text-slate-600 focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
                 {...register("name")}
               />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="profession" className="text-slate-200 text-xs uppercase font-medium tracking-wide">Profession</Label>
+              <Label htmlFor="profession" className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Profession</Label>
               <Input
                 id="profession"
                 placeholder="Developer"
-                className="bg-slate-950/50 border-white/5 text-white placeholder:text-slate-600 focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
                 {...register("profession")}
               />
-              {errors.profession && <p className="text-xs text-red-500">{errors.profession.message}</p>}
+              {errors.profession && <p className="text-xs text-destructive">{errors.profession.message}</p>}
             </div>
           </div>
 
           {/* Country & Gender Row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label className="text-slate-200 text-xs uppercase font-medium tracking-wide">Country</Label>
+              <Label className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Country</Label>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -143,8 +143,8 @@ export function SignupForm() {
                     type="button"
                     aria-expanded={open}
                     className={cn(
-                      "w-full justify-between bg-slate-950/50 border-white/5 text-white hover:bg-white/10 hover:text-white h-11",
-                      !countryValue && "text-slate-500"
+                      "w-full justify-between bg-muted/50 border-input text-foreground hover:bg-muted hover:text-foreground h-11",
+                      !countryValue && "text-muted-foreground"
                     )}
                   >
                     <span className="truncate">
@@ -155,9 +155,9 @@ export function SignupForm() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0 border-white/10 bg-slate-900 text-white">
-                  <Command className="bg-slate-900 text-white">
-                    <CommandInput placeholder="Search country..." className="text-white" />
+                <PopoverContent className="w-[200px] p-0 border-border bg-popover text-popover-foreground">
+                  <Command className="bg-popover text-popover-foreground">
+                    <CommandInput placeholder="Search country..." className="text-foreground" />
                     <CommandList>
                       <CommandEmpty>No country found.</CommandEmpty>
                       <CommandGroup>
@@ -169,7 +169,7 @@ export function SignupForm() {
                               setValue("country", country.value, { shouldValidate: true });
                               setOpen(false);
                             }}
-                            className="text-white hover:bg-slate-800"
+                            className="text-foreground hover:bg-accent hover:text-accent-foreground"
                           >
                             <Check
                               className={cn(
@@ -185,28 +185,28 @@ export function SignupForm() {
                   </Command>
                 </PopoverContent>
               </Popover>
-              {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
+              {errors.country && <p className="text-xs text-destructive">{errors.country.message}</p>}
             </div>
 
             <div className="grid gap-2">
-              <Label className="text-slate-200 text-xs uppercase font-medium tracking-wide">Gender</Label>
+              <Label className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Gender</Label>
               <Select onValueChange={(val) => setValue("gender", val)}>
-                <SelectTrigger className="bg-slate-950/50 border-white/5 text-white h-11">
+                <SelectTrigger className="bg-muted/50 border-input text-foreground h-11">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white">
+                <SelectContent className="bg-popover border-border text-popover-foreground">
                   <SelectItem value="MALE">Male</SelectItem>
                   <SelectItem value="FEMALE">Female</SelectItem>
                   <SelectItem value="NON_BINARY">Non-binary</SelectItem>
                   <SelectItem value="PREFER_NOT_TO_SAY">Prefer not to say</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.gender && <p className="text-xs text-red-500">{errors.gender.message}</p>}
+              {errors.gender && <p className="text-xs text-destructive">{errors.gender.message}</p>}
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="email" className="text-slate-200 text-xs uppercase font-medium tracking-wide">Email</Label>
+            <Label htmlFor="email" className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Email</Label>
             <Input
               id="email"
               placeholder="name@company.com"
@@ -214,23 +214,23 @@ export function SignupForm() {
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect="off"
-              className="bg-slate-950/50 border-white/5 text-white placeholder:text-slate-600 focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
+              className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
               {...register("email")}
             />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="password" className="text-slate-200 text-xs uppercase font-medium tracking-wide">Password</Label>
+            <Label htmlFor="password" className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Password</Label>
             <Input
               id="password"
               placeholder="••••••••"
               type="password"
               autoComplete="new-password"
-              className="bg-slate-950/50 border-white/5 text-white placeholder:text-slate-600 focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
+              className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
               {...register("password")}
             />
-            {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+            {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
           </div>
 
           <Button disabled={isLoading} className="bg-blue-600 hover:bg-blue-500 text-white w-full h-11 mt-2 shadow-lg shadow-blue-900/20 transition-all font-medium">
@@ -242,17 +242,17 @@ export function SignupForm() {
 
       <div className="relative my-2">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/5" />
+          <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-          <span className="bg-[#0f172a] px-3 text-slate-500">or with</span>
+          <span className="bg-background px-3 text-muted-foreground">or with</span>
         </div>
       </div>
 
       <div className="grid gap-3">
         <Button
           variant="outline"
-          className="w-full bg-white/5 border-white/5 text-white hover:bg-white/10 hover:text-white h-11 font-normal relative"
+          className="w-full h-11 font-normal relative"
           onClick={() => onSocialLogin("google")}
           disabled={isLoading}
         >
@@ -261,7 +261,7 @@ export function SignupForm() {
         </Button>
         <Button
           variant="outline"
-          className="w-full bg-white/5 border-white/5 text-white hover:bg-white/10 hover:text-white h-11 font-normal relative"
+          className="w-full h-11 font-normal relative"
           onClick={() => onSocialLogin("github")}
           disabled={isLoading}
         >

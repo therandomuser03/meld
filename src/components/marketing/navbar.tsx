@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MessageSquareCode, User } from "lucide-react";
 import { motion } from "framer-motion";
+import { ModeToggle } from "../ui/theme-changer";
 
 export function Navbar() {
   return (
@@ -21,10 +22,12 @@ export function Navbar() {
           <span>Meld</span>
         </Link>
         <div className="flex items-center gap-4">
+          
           <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             <User className="h-6 w-6 border-2 rounded-full" />
             Login
           </Link>
+          <ModeToggle />
           {/* <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6">
             <Link href="/signup">Get Started</Link>
           </Button> */}

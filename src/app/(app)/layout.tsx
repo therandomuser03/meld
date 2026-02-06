@@ -3,6 +3,7 @@ import { Shell } from "@/components/shell/shell";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,13 @@ export default async function AppLayout({
   };
 
   return (
-    <div className="min-h-screen dark:bg-slate-950 bg-slate-300 dark:text-slate-50 text-slate-900">
+    <div className="relative min-h-screen dark:bg-slate-950 bg-slate-300 dark:text-slate-50 text-slate-900 transition-colors duration-500 z-0">
+      <DotPattern
+        width={30}
+        height={30}
+        cr={1.25}
+        className="inset-0 -z-10 opacity-50 text-primary/50 dark:text-muted-foreground/50 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"
+      />
       <TooltipProvider delayDuration={0} skipDelayDuration={0}>
         <SidebarProvider>
           <Shell userProfile={profile}>

@@ -93,7 +93,7 @@ export function LoginForm() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-5">
           <div className="grid gap-2">
-            <Label htmlFor="email" className="text-slate-200 text-xs uppercase font-medium tracking-wide">Email Address</Label>
+            <Label htmlFor="email" className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Email Address</Label>
             <Input
               id="email"
               placeholder="name@company.com"
@@ -101,25 +101,25 @@ export function LoginForm() {
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect="off"
-              className="bg-slate-950/50 border-white/5 text-white placeholder:text-slate-600 focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
+              className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
               {...register("email")}
             />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="grid gap-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-slate-200 text-xs uppercase font-medium tracking-wide">Password</Label>
+              <Label htmlFor="password" className="text-muted-foreground text-xs uppercase font-medium tracking-wide">Password</Label>
             </div>
             <Input
               id="password"
               type="password"
-              className="bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
+              className="bg-muted/50 border-input text-foreground focus:border-blue-500/50 focus:ring-blue-500/20 h-11"
               {...register("password")}
             />
-            {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+            {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             <div className="flex justify-end">
-              <Link href="#" className="text-xs text-slate-400 hover:text-blue-400 transition-colors">
+              <Link href="#" className="text-xs text-muted-foreground hover:text-blue-500 transition-colors">
                 Forgot Password?
               </Link>
             </div>
@@ -134,17 +134,17 @@ export function LoginForm() {
 
       <div className="relative my-2">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/5" />
+          <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-          <span className="bg-[#0f172a] px-3 text-slate-500">or with</span>
+          <span className="bg-background px-3 text-muted-foreground">or with</span>
         </div>
       </div>
 
       <div className="grid gap-3">
         <Button
           variant="outline"
-          className="w-full bg-white/5 border-white/5 text-white hover:bg-white/10 hover:text-white h-11 font-normal relative"
+          className="w-full h-11 font-normal relative"
           onClick={() => onSocialLogin("google")}
           disabled={isLoading}
         >
@@ -153,7 +153,7 @@ export function LoginForm() {
         </Button>
         <Button
           variant="outline"
-          className="w-full bg-white/5 border-white/5 text-white hover:bg-white/10 hover:text-white h-11 font-normal relative"
+          className="w-full h-11 font-normal relative"
           onClick={() => onSocialLogin("github")}
           disabled={isLoading}
         >

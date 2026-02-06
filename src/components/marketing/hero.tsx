@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
+import { Ripple } from "@/components/ui/ripple";
+
 export function Hero() {
   return (
     <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-background">
       {/* Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1200px] bg-primary/10 blur-[160px] rounded-full pointer-events-none" />
+      <Ripple 
+        mainCircleOpacity={0.3}
+        mainCircleSize={320}
+        className="[--foreground:var(--primary)] text-primary -translate-y-28" 
+      />
 
       <div className="container px-4 md:px-6 relative z-10 flex flex-col items-center text-center">
 
@@ -52,7 +59,7 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
         >
-          <Button asChild size="lg" className="bg-text hover:bg-text/90 text-background rounded-full px-8 h-12 text-base font-medium min-w-[160px]">
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/80 text-background rounded-full px-8 h-12 text-base font-medium min-w-[160px]">
             <Link href="/signup">
               Start Building
             </Link>
