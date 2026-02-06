@@ -31,8 +31,6 @@ Whether you're brainstorming in a group chat, managing a Kanban board, or collab
 
 <img width="1920" height="1695" alt="Meld Dashboard Preview" src="https://github.com/user-attachments/assets/09a902c7-caca-4503-af6c-d1933e4d6808" />
 
-> *Tip: Drag and drop screenshots of the Dashboard, Chat Interface with Translation Dialog, and Task Board here.*
-
 ---
 
 ## 🛠 Tech Stack
@@ -104,7 +102,7 @@ Follow these steps to set up Meld locally.
     Open `.env` and fill in your keys:
 
     | Variable | Description |
-    | men | men |
+    | --- | --- |
     | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase Project URL |
     | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Your Supabase Anon Key |
     | `DATABASE_URL` | Supabase Transaction Pooler URL (6543) |
@@ -158,15 +156,6 @@ Meld was built specifically for the **Lingo.dev Hackathon**.
 **Key Learnings:**
 - Implementing the `LingoDotDevEngine` SDK was straightforward and powerful.
 - Balancing real-time state (Supabase) with async translation actions required careful UI state management (loading states, optimistic updates).
-
----
-
-## 🔮 Future Roadmap
-
-- [ ] **Voice-to-Text Translation**: Adding audio transcription and translation.
-- [ ] **Document Translation**: Translate entire Note documents with one click.
-- [ ] **Team Workspaces**: Deeper permission models for enterprise teams.
-- [ ] **Mobile App**: React Native export for iOS/Android.
 
 ---
 
